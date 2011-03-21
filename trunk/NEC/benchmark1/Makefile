@@ -1,0 +1,12 @@
+# Paremeters.
+CALLNEC_SRC=CALLNEC.f90
+CALLNEC_EXE=CALLNEC.exe
+GFORTRAN=gfortran-mp-4.5
+
+all: $(CALLNEC_EXE)
+
+$(CALLNEC_EXE): $(CALLNEC_SRC) 
+	$(GFORTRAN) $(CALLNEC_SRC) -o $(CALLNEC_EXE)
+
+clean:
+	rm -rf *.exe *.OUT *.INP
