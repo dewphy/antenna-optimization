@@ -40,6 +40,7 @@ zlabel('Directivity (dimensionless)', 'FontSize', 20);
 
 %% Save directivity (NEC).
 dlmwrite('./outputs/directivity-b2.txt', Z);
+save('./outputs/directivity-b2.m', 'X', 'Y', 'Z');
 
 %% Compute fitted directivity (cubic interpolation).
 opts = fitoptions('cubicinterp');
@@ -58,9 +59,9 @@ zlabel('Directivity (dimensionless)', 'FontSize', 20);
 %% Plot fitted directivity (Cubic Interpolation).
 figure('Name', 'Benchmark#2 - without noise (NEC + Cubic Interpolation)');
 
-step = 0.1;
-XX = 0:0.5:180;
-YY = 5:0.05:15;
+step = 0.01;
+XX = 0:step:180;
+YY = 5:step:15;
 
 [XX, YY] = meshgrid(XX, YY);
 ZZ = fitresult(XX(:), YY(:));
@@ -72,5 +73,7 @@ ylabel('Distance (meter)', 'FontSize', 20);
 zlabel('Directivity (dimensionless)', 'FontSize', 20);
 
 %% Save directivity (Cubic Interpolation).
-dlmwrite('./outputs/directivity-b2-ci.txt', ZZ);
+ZZ_noise = ZZ + normrnd(0,sqrt(0.2), size(ZZ,1), size(ZZ,2));
+dlmwrite('./outputs/directivity-b2-ci.txt', ZZ_noise);
 save('./outputs/directivity-b2-ci.m', 'XX', 'YY', 'ZZ');
+
