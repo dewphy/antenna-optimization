@@ -53,7 +53,7 @@ view(-53.5, 40);
 %% Plot fitted directivity (Cubic Interpolation).
 figure('Name', 'Benchmark#1 - (NEC + Cubic Interpolation)');
 
-step = 0.0001;
+step = 0.01;
 XX = 0:step:90;
 YY = 0.5:step:3;
 
