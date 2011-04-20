@@ -1,15 +1,12 @@
 
 import java.util.*;
-import java.io.*;
-import java.text.*;
+
 public class Particle implements Comparable<Object> {
 	
-	final int SIZE=2;
-	final float[] UPPER_BOUND = Constants.UPPER_BOUND_2;
-	final float[] LOWER_BOUND = Constants.LOWER_BOUND_2;
 	
+	final float error=0.0001f;
 	
-	
+	private int SIZE=2;
 	private float[] position;
 	private float[] velocity;
 	private float[] particleBestPosition;
@@ -17,15 +14,61 @@ public class Particle implements Comparable<Object> {
 	private float currentFitness;
 	private float bestFitness;
 	
-	public Particle(){
+	private float[] lowerBound;
+	private float[] upperBound;
+	
+	private int benchmarkNumber;
+	public Particle(int benchNumber){
+		benchmarkNumber=benchNumber;
+		switch (benchmarkNumber){
+		case 1: lowerBound=Constants.LOWER_BOUND_1;
+				upperBound=Constants.UPPER_BOUND_1;
+				break;
+		case 2: lowerBound=Constants.LOWER_BOUND_2;
+				upperBound=Constants.UPPER_BOUND_2;
+				
+				break;
+		
+		case 3: lowerBound=Constants.LOWER_BOUND_3;
+				upperBound=Constants.UPPER_BOUND_3;
+				
+				break;
+		
+		case 4: lowerBound=Constants.LOWER_BOUND_4;
+				upperBound=Constants.UPPER_BOUND_4;
+				break;
+		
+		case 5: SIZE=6;
+				lowerBound=new float[SIZE];
+				upperBound=new float[SIZE];
+				for(int i=0; i<SIZE; i++){
+					upperBound[i]=Constants.UPPER_BOUND_5;
+					lowerBound[i]=Constants.LOWER_BOUND_5;
+				}
+					break;
+		
+			
+		case 6: SIZE=12;
+			lowerBound=new float[SIZE];
+			upperBound=new float[SIZE];
+			for(int i=0; i<SIZE; i++){
+				upperBound[i]=Constants.UPPER_BOUND_5;
+				lowerBound[i]=Constants.LOWER_BOUND_5;
+			}
+			break;
+	
+		
+	}
 		position=new float[SIZE];
 		velocity=new float[SIZE];
 		particleBestPosition=new float[SIZE];
 		
 		Random generator=new Random();
 		for(int i=0; i<SIZE; i++){
-			position[i]=generator.nextFloat()*(UPPER_BOUND[i]-LOWER_BOUND[i])+LOWER_BOUND[i];
-			velocity[i]=2*generator.nextFloat()*(UPPER_BOUND[i]-LOWER_BOUND[i])+(LOWER_BOUND[i]-UPPER_BOUND[i]);
+//			UPPER_BOUND[i]=Constants.UPPER_BOUND_5;
+//			LOWER_BOUND[i]=Constants.LOWER_BOUND_5;
+			position[i]=generator.nextFloat()*(upperBound[i]-lowerBound[i])+lowerBound[i];
+			velocity[i]=2*generator.nextFloat()*(upperBound[i]-lowerBound[i])+(lowerBound[i]-upperBound[i]);
 			
 			particleBestPosition[i]=position[i];
 			
@@ -34,9 +77,13 @@ public class Particle implements Comparable<Object> {
 		
 		
 	}
+	
+	public int getNumberOfGenes(){
+		return SIZE;
+	}
 		
 	public void setPosition(float[] position) {
-		for(int i=0; i<SIZE; i++){
+		for(int i=0; i<position.length; i++){
 			this.position[i]=position[i];
 		}
 	}	
@@ -45,9 +92,9 @@ public class Particle implements Comparable<Object> {
 		return position;
 	}	
 	
-	public void setVelocity(float[] velocity) {
-		for(int i=0; i<SIZE; i++){
-			this.velocity[i]=velocity[i];
+	public void setVelocity(float[] vel) {
+		for(int i=0; i<vel.length; i++){
+			this.velocity[i]=vel[i];
 		}
 	}	
 	
@@ -82,17 +129,17 @@ public class Particle implements Comparable<Object> {
 		
 	public void updatePosition(){
 		
-		for(int i=0; i<SIZE; i++){
+		for(int i=0; i<position.length; i++){
 				position[i]=position[i] + velocity[i];
 				
-				if (position[i]>=UPPER_BOUND[i]){
+				if (position[i]>=upperBound[i]){
 					velocity[i]=(float)0;
-					position[i]=UPPER_BOUND[i];
+					position[i]=lowerBound[i];
 				}
 				
-				if (position[i]<=LOWER_BOUND[i]){
+				if (position[i]<=lowerBound[i]){
 					velocity[i]=(float)0;
-					position[i]=LOWER_BOUND[i];
+					position[i]=lowerBound[i];
 				}
 				
 		}
@@ -100,11 +147,21 @@ public class Particle implements Comparable<Object> {
 			
 }
 			
-		public void updateVelocity(float weight, float c1, float c2, float[] globalBest, float[] maxVelocity){
-			for(int i=0; i<SIZE; i++){
-				Random generator=new Random();
-				float r1=generator.nextFloat();
-				float r2=generator.nextFloat();
+//		public void updateVelocity(float weight, float c1, float c2, float[] globalBest, float[] maxVelocity){
+//			for(int i=0; i<SIZE; i++){
+//				Random generator=new Random();
+//				float r1=generator.nextFloat();
+//				float r2=generator.nextFloat();
+//				velocity[i]=weight*velocity[i]+c1*r1*(globalBest[i]-position[i])+c2*r2*(particleBestPosition[i]-position[i]);
+//				if (velocity[i]>maxVelocity[i]){
+//					velocity[i]=maxVelocity[i];
+//				}
+//			}
+//		}
+		
+		public void updateVelocity(float weight, float c1, float c2, float r1, float r2, float[] globalBest, float[] maxVelocity){
+			for(int i=0; i<velocity.length; i++){
+				
 				velocity[i]=weight*velocity[i]+c1*r1*(globalBest[i]-position[i])+c2*r2*(particleBestPosition[i]-position[i]);
 				if (velocity[i]>maxVelocity[i]){
 					velocity[i]=maxVelocity[i];
@@ -112,15 +169,15 @@ public class Particle implements Comparable<Object> {
 			}
 		}
 		
-		public void updateParticle(float weight, float c1, float c2, float[] globalBest, float[] maxVelocity){
+		public void updateParticle(float weight, float c1, float c2, float r1, float r2, float[] globalBest, float[] maxVelocity){
 			
-				this.updateVelocity(weight, c1, c2, globalBest, maxVelocity);
+				this.updateVelocity(weight, c1, c2, r1, r2, globalBest, maxVelocity);
 				this.updatePosition();
 		}
 		
 		public Particle copy(){
 			
-			Particle copy=new Particle();
+			Particle copy=new Particle(benchmarkNumber);
 			
 			copy.setVelocity(velocity);
 			copy.setPosition(position);
@@ -133,8 +190,8 @@ public class Particle implements Comparable<Object> {
 		
 		public boolean equals(Particle anotherParticle){
 			boolean equal=false;
-			for(int i=0; i<SIZE; i++){
-				if(bestFitness==anotherParticle.getBestFitness()){
+			for(int i=0; i<velocity.length; i++){
+				if(Math.abs(bestFitness-anotherParticle.getBestFitness())<error){
 					equal=true;
 				}
 				else equal=false;
@@ -154,13 +211,18 @@ public class Particle implements Comparable<Object> {
 		}
 		
 		public String toString(){
+			String particle="Particle:\n";
+			for (int i=0; i<position.length; i++){
+				particle=particle + "GENE_" + i +position[i]+"\n";
+			}
 			
-			String particle="Theta: " + position[0] +"\n"+
-			"Length: " + position[1]+ "\n"+
-			"Current Fitness: "+ currentFitness +"\n"+
-			"Best Theta: " + particleBestPosition[0] +"\n"+
-			"Best Length: " + particleBestPosition[1]+"\n"+
-			"Best Fitness: "+ bestFitness + "\n";
+			particle=particle+"Best Fitness: "+ bestFitness + "\n";
+//			String particle="Theta: " + position[0] +"\n"+
+//			"Length: " + position[1]+ "\n"+
+//			"Current Fitness: "+ currentFitness +"\n"+
+//			"Best Theta: " + particleBestPosition[0] +"\n"+
+//			"Best Length: " + particleBestPosition[1]+"\n"+
+//			"Best Fitness: "+ bestFitness + "\n";
 			
 			return particle;
 			
