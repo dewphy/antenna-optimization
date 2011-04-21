@@ -1,9 +1,11 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
-public class ParticleSwarmOptimizer {
+public class ParticleSwarmOptimizer implements Algorithm {
 	
 	final int NUMBER_OF_PARTICLES=30;
 	//final int NUMBER_OF_GENES=2;
@@ -17,24 +19,19 @@ public class ParticleSwarmOptimizer {
 	private Particle[] swarm;
 	private FitnessEvaluatorImpl fitnessValues;
 	private Particle bestParticleEver;
-	List<Particle> evaluatedParticles;
-	
-	//final float[] MAX_VELOCITY={0.2f* (UPPER_BOUND[0]-LOWER_BOUND[0]), 
-		//	0.2f*(UPPER_BOUND[1]-LOWER_BOUND[1])};
+	private List<Particle> bestParticles=new ArrayList<Particle>();
 	
 	float[] dimension;
 	String neighborhoodType;
 	
-	//float[] globalBest;
-	//float globalBestFitness;
 	
 	
 	
-	ParticleSwarmOptimizer(int benchmarkNumber, String neighborhood){
+	ParticleSwarmOptimizer(int benchmarkNumber, boolean discrete, String neighborhoodType){
 		
-		evaluatedParticles=new ArrayList<Particle>();
-		neighborhoodType=neighborhood;
-		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber);
+		
+		this.neighborhoodType=neighborhoodType;
+		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber,discrete);
 		//fitnessValues.load();
 		//fitnessValues.print();
 		swarm = new Particle[NUMBER_OF_PARTICLES];
@@ -48,7 +45,7 @@ public class ParticleSwarmOptimizer {
 			
 			swarm[i].setCurrentFitness(fitnessValues.evaluate(swarm[i].getPosition()));
 			swarm[i].setBestFitness(swarm[i].getCurrentFitness());
-			evaluatedParticles.add(swarm[i].copy());
+			
 			
 			//System.out.println("After: " + swarm[i].toString());
 			if (swarm[i].getCurrentFitness()>bestParticleEver.getCurrentFitness()){
@@ -58,11 +55,34 @@ public class ParticleSwarmOptimizer {
 			}
 			
 		}
-		
-		
+		bestParticles.add(bestParticleEver);
 		findDimension();
 	}
 	
+	public float[] getBestPosition(){
+		return bestParticleEver.getPosition();
+	}
+	
+	public float getBestFitness(){
+		return bestParticleEver.getCurrentFitness();
+	}
+	
+	public float[] getBestFitnesses(){
+		float[] temp=new float[bestParticles.size()];
+		for (int i=0; i<bestParticles.size();i++){
+			temp[i]=bestParticles.get(i).getCurrentFitness();
+		}
+		return temp;
+	}
+	
+	public float[][] getBestPositions(){
+		float[][] temp=new float[bestParticles.size()][fitnessValues.getPositionLength()];
+		
+		for (int i=0; i<bestParticles.size();i++){
+			temp[i]=bestParticles.get(i).getPosition();
+		}
+		return temp;
+	}
 	
 	public Particle getBestParticleEver(){
 		return bestParticleEver;
@@ -77,10 +97,6 @@ public class ParticleSwarmOptimizer {
 		return fitnessValues;
 	}
 	
-	public List<Particle> getEvaluatedParticles(){
-		return evaluatedParticles;
-		
-	}
 	
 	public void updateParticleSwarm(){
 		int i=0;
@@ -131,7 +147,7 @@ public class ParticleSwarmOptimizer {
 			i++;
 			
 		}
-		
+		bestParticles.add(bestParticleEver);
 		findDimension();
 		
 	}
@@ -185,18 +201,10 @@ public class ParticleSwarmOptimizer {
 	}
 	
 	public void updateParticleFitness(Particle part){
-		int index=searchForEvaluatedParticle(part);
-		float currentFit;
-		if (index==-1){
-			currentFit=fitnessValues.evaluate(part.getPosition());
-			part.setCurrentFitness(currentFit);
-			evaluatedParticles.add(part.copy()); //Particle best not updated in this array
-		} else {
-			//System.out.println("To be evaluated: " + part.toString());
-			//System.out.println("Already in array: " + evaluatedParticles.get(index).toString());
-			currentFit=evaluatedParticles.get(index).getCurrentFitness();
-			part.setCurrentFitness(currentFit);
-		}
+		
+		float currentFit=fitnessValues.evaluate(part.getPosition());
+		part.setCurrentFitness(currentFit);
+		
 		
 		if (currentFit>part.getBestFitness()){
 			part.setBestFitness(currentFit);
@@ -205,39 +213,6 @@ public class ParticleSwarmOptimizer {
 		}
 	}
 	
-	public int searchForEvaluatedParticle(Particle part){
-		float[] acc=new float[part.getPosition().length];
-		
-		//To account for different sizes of the position vector in different benchmarks
-		
-		switch (part.getPosition().length){
-		
-		case 2: acc[0]=0.01f;
-				acc[1]=0.0001f;
-				break;
-		case 6: 
-		case 12: 
-				for (int i=0; i<part.getPosition().length; i++){
-				acc[i]=0.01f;
-				}
-				break;
-		
-		}
-		int i=0;
-		int particleIndex=-1;
-		while (i<evaluatedParticles.size() && particleIndex==-1){
-			int j=0;
-			particleIndex=i;
-			while (j<part.getPosition().length && particleIndex!=-1){
-				if (Math.abs(part.getPosition()[j]-evaluatedParticles.get(i).getPosition()[j])>=acc[j]){
-					particleIndex=-1;
-				}else { j++;}
-			}
-			
-			i++;
-		}
-		return particleIndex;
-	}
 	
 	public void updateBestParticleEver(Particle part){
 		

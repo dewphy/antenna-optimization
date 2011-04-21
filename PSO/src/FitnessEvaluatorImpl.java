@@ -1,7 +1,6 @@
 
 import java.util.*;
 import java.io.*;
-import java.lang.*;
 
 
 
@@ -21,6 +20,7 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	private int numberOfEvaluations; 
 	private int benchmarkNumber; //1: theta, length; 2: theta, distance, 3: theta, beta, 4: alpha, length 
 	private String filePath;	// defined in the interface
+	
 	private List<List<Float>> fitnessValues; //to create a matrix of fitness values 
 	private DecimalFormat format1;
 	
@@ -32,62 +32,117 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	final String NEC_IN_FILE_NAME="nec2c/NEC.INP";
 	final String NEC_COMMAND="nec2c/nec2c";
 	
-	private float theta_step;
-	private float param2_step;
-	private float lower_bound_1;
-	private float lower_bound_2;
-	private float upper_bound_1;
-	private float upper_bound_2;
+	private float[] step;
+	private float maxFitness;
+	
+	private float[][] maximaPositions;
+	
+	private float[] lowerBound;
+	private float[] upperBound;
+	
+	
+	Map<String,Float> cache = new HashMap<String,Float>();
+	private boolean discrete;
 	
 	private int NDIP;
 	
 	//Constructor takes in the number of the benchmark, links to file path
-	public FitnessEvaluatorImpl(int benchNum){
+	public FitnessEvaluatorImpl(int benchmarkNumber, boolean discrete){
+		
 		numberOfEvaluations=0;
-		benchmarkNumber=benchNum;
+		this.discrete=discrete;
+		this.benchmarkNumber=benchmarkNumber;
 		fitnessValues=new ArrayList<List<Float>>();
 		format1=new DecimalFormat("00.000000");
 		
 		switch (benchmarkNumber){
-			case 1: filePath=PATH_BENCH1; 
-					theta_step=THETA_STEP;
-					param2_step=LENGTH_STEP; 
-					lower_bound_1=LOWER_THETA;  
-					upper_bound_1=UPPER_THETA_1;
-					lower_bound_2=LOWER_LENGTH;
-					upper_bound_2=UPPER_LENGTH;
+		case 1: lowerBound=Constants.LOWER_BOUND_1;
+				upperBound=Constants.UPPER_BOUND_1;
+				step=Constants.STEP_1;
+				filePath=Constants.PATH_BENCH_1;
+				maxFitness=Constants.MAX_FITNESS_1;
+				maximaPositions=Constants.BEST_POSITION_1;
+				break;
+		
+		case 2: lowerBound=Constants.LOWER_BOUND_2;
+				upperBound=Constants.UPPER_BOUND_2;
+				step=Constants.STEP_2;
+				filePath=Constants.PATH_BENCH_2;
+				maxFitness=Constants.MAX_FITNESS_2;
+				maximaPositions=Constants.BEST_POSITION_2;
+				NDIP=10;
+				break;
+		
+		case 3: lowerBound=Constants.LOWER_BOUND_3;
+				upperBound=Constants.UPPER_BOUND_3;
+				step=Constants.STEP_3;
+				filePath=Constants.PATH_BENCH_3;
+				maxFitness=Constants.MAX_FITNESS_3;
+				maximaPositions=Constants.BEST_POSITION_3;
+				NDIP=8;
+				break;
+		
+		case 4: lowerBound=Constants.LOWER_BOUND_4;
+				upperBound=Constants.UPPER_BOUND_4;
+				step=Constants.STEP_4;
+				filePath=Constants.PATH_BENCH_4;
+				maxFitness=Constants.MAX_FITNESS_4;
+				maximaPositions=Constants.BEST_POSITION_4;
+				break;
+				
+		case 5:		lowerBound=new float[6];
+					upperBound=new float[6];
+					discrete=false;
 					
-					break;
-			case 2: filePath=PATH_BENCH2; 
-					theta_step=THETA_STEP; 
-					param2_step=DISTANCE_STEP;
-					lower_bound_1=LOWER_THETA;  
-					upper_bound_1=UPPER_THETA_2;
-					lower_bound_2=LOWER_DISTANCE;
-					upper_bound_2=UPPER_DISTANCE;
-					NDIP=10;
-					break;
-			case 3: filePath=PATH_BENCH3; 
-					theta_step=THETA_STEP; 
-					param2_step=BETA_STEP;
-					lower_bound_1=LOWER_BETA;  
-					upper_bound_1=UPPER_BETA;
-					lower_bound_2=LOWER_ALPHA;
-					upper_bound_2=UPPER_ALPHA;
-					NDIP=8;
-					break;
-			case 4: filePath=PATH_BENCH4; 
-					theta_step=THETA_STEP; 
-					param2_step=LENGTH_STEP;
-					lower_bound_1=LOWER_THETA;  
-					upper_bound_1=UPPER_THETA_1;
-					lower_bound_2=LOWER_LENGTH;
-					upper_bound_2=UPPER_LENGTH;
-					break;
-			default: filePath=null;
-			
+				for(int i=0; i<lowerBound.length; i++){
+					upperBound[i]=Constants.UPPER_BOUND_5;
+					lowerBound[i]=Constants.LOWER_BOUND_5;
+				}
+				maxFitness=Constants.MAX_FITNESS_5;
+				maximaPositions=Constants.BEST_POSITION_5;
+				NDIP=7;
+				break;
+				
+		case 6: 
+				lowerBound=new float[12];
+				upperBound=new float[12];
+				discrete=false;
+				for(int i=0; i<lowerBound.length; i++){
+					upperBound[i]=Constants.UPPER_BOUND_5;
+					lowerBound[i]=Constants.LOWER_BOUND_5;
+					
+				}
+				maxFitness=Constants.MAX_FITNESS_6;
+				maximaPositions=Constants.BEST_POSITION_6;
+				NDIP=13;
+				break; 
 		}
 		
+		if (discrete){
+			this.load();
+		}
+		
+	}
+	
+	public float[] getUpperBound(){
+		return upperBound;
+	}
+	public float[] getLowerBound(){
+		return lowerBound;
+	}
+
+	public float getBestFitness(){
+
+	    return maxFitness;
+	}
+
+	public float[][] getBestPosition(){
+		return maximaPositions;
+		
+	}
+	
+	public int getPositionLength(){
+		return lowerBound.length;
 	}
 	
 	//Returns the number of Evaluations performed for the class instance
@@ -125,9 +180,6 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 			
 		while (str!=null) {
 			
-				
-			
-				
 				ArrayList<Float> gainAtLength = new ArrayList<Float>();
 				
 				String lineGain=str.trim(); //read a line from the file
@@ -162,115 +214,62 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		}
 }
 	public float evaluate(float[] position){
-		numberOfEvaluations++;
-		this.createNecInputFile(position);
-		this.runNec();
-		return this.getGainFromOutputFile();
+		
+		StringBuilder keyBuilder = new StringBuilder(); 
+		for (int i = 0; i < position.length; i++) {
+			keyBuilder.append(String.valueOf(position[i]) + "|");
+		}
+		String key = keyBuilder.toString();
+
+		if (!cache.containsKey(key)) {
+			Float fitness;
+			numberOfEvaluations++;
+			if (discrete) {
+				int row=(int) ((position[0]-lowerBound[0])/step[0]);
+				int column=(int)((position[1]-lowerBound[1])/step[1]);
+			
+				fitness=fitnessValues.get(row).get(column);
+				
+			} else {
+				this.createNecInputFile(position);
+				this.runNec();
+				fitness = this.getGainFromOutputFile();
+			}
+			cache.put(key, fitness);
+		}
+		return cache.get(key);
 	}
 		
 	
-	//Evaluates the fitness value for individual with parameters x1 and x2
-public float evaluate(float x1, float x2){
-		numberOfEvaluations++;
-//		float fitness= 0;
-//		float[] x=new float[4];
-//		float[] y=new float[4];
-//		float[] z=new float[4];
-//		
-		
-		int row=(int) ((x1-lower_bound_1)/theta_step);
-		int column=(int)((x2-lower_bound_2)/param2_step);
-//		
-		return fitnessValues.get(row).get(column);
-}
-//	 if (row==fitnessValues.size()-1 && column==fitnessValues.get(0).size()-1){
-//			row=row-1;
-//			column=column-1;
-//		}else if (row==fitnessValues.size()-1){
-//			row=row-1;
-//		}else if (column==fitnessValues.get(0).size()-1){
-//			column=column-1;
-//		}
-//		
-//	 float dist1=(float) (Math.pow((x1-row),2)+Math.pow((x2-column),2));
-//	 float dist2=(float) (Math.pow((x1-row-1),2)+Math.pow((x2-column-1),2));
-//		
-//		
-//		int a,b=0;
-//		
-//		if (dist1>dist2){
-//			a=row+1;
-//			b=column+1;
-//		} else {
-//			a=row;
-//			b=column;
-//		}
-//			x[0]=this.getTheta(a);
-//			y[0]=this.getParam2(b);
-//			z[0]=fitnessValues.get(a).get(b);
-//			
-//			x[1]=this.getTheta(row);
-//			y[1]=this.getParam2(column+1);
-//			z[1]=fitnessValues.get(row).get(column+1);
-//			
-//			x[2]=this.getTheta(row+1);
-//			y[2]=this.getParam2(column);
-//			z[2]=fitnessValues.get(row+1).get(column);
-//			
-//			x[3]=x1;
-//			y[3]=x2;
-//			z[3]=0;
-//			fitness=findPointInPlane(x,y,z);
-		
-		//create NEC Input File
-//		try{
-//			FileWriter wis = new FileWriter("nec2c/NEC.INP");
-//			PrintWriter bwis = new PrintWriter(wis);
-//		
-//		bwis.println("CM Benchmark #1\nCE");
-//		float lengthHalf=x2/2;
-//		int segments=(int)(x2/0.02)-1;
-//		StringBuilder sb = new StringBuilder();
-//		   // Send all output to the Appendable object sb
-//		   Formatter formatter = new Formatter(sb, Locale.US);
-//		 
-//		formatter.format(FORMAT,1,segments,0.,0.,-lengthHalf,0.,0.,-.01,0.001);
-//		formatter.format(FORMAT,2,2,0.,0.,-.01,0.,0.,0.01,0.001);
-//		//System.out.println(formatter.format(FORMAT,1,segments,0.,0.,0.01,0.,0.,lengthHalf,0.001));
-//		bwis.print(formatter.format(FORMAT,1,segments,0.,0.,0.01,0.,0.,lengthHalf,0.001));
-//		bwis.println("GE 0");
-//		bwis.println("EX 0,2,1,0,0.5,0");
-//		bwis.println("EX 0,2,2,0,0.5,0");
-//		
-//		String RadiationPattern=String.format(FORMAT_RP, x1);
-//		bwis.println(RadiationPattern);
-//		bwis.println("EN");
-//		bwis.close();
-//		wis.close();
-//		
-//		}catch (FileNotFoundException e) {
-//		       e.printStackTrace();
-//		     } catch (IOException e) {
-//			
-//			e.printStackTrace();
-//		}
-		
-		
-//		WRITE(15,154) 1,J+23,0.,0.,-0.25-REAL(J-1)*0.01,0.,0.,-.01,0.001
-//		WRITE(15,154) 2,2,0.,0.,-.01,0.,0.,0.01,0.001
-//		WRITE(15,154) 2,J+23,0.,0.,0.01,0.,0.,0.25+REAL(J-1)*0.01,0.001
-//
-//		WRITE(15,153)'GE 0'
-//		WRITE(15,153)'EX 0,2,1,0,0.5,0'
-//		WRITE(15,153)'EX 0,2,2,0,0.5,0'
-//		WRITE(15,153)'RP 0,361,1,1010, 0., 0., 0.5, 0.'
-//		WRITE(15,153)'EN'
-		
-//		this.createNecInputFile(x1,x2);
-//		this.runNec();
-//		return this.getGainFromOutputFile();
-//	}
-		
+
+	public boolean isOptimumFound() {
+		for (Float fitness : cache.values()) {
+			if (Math.abs(fitness - getBestFitness()) < Constants.ACCURACY) {
+				return true;
+			}
+		}
+		if (benchmarkNumber==2){
+			
+			for(String keys:cache.keySet()){
+				for (int i=0; i<maximaPositions.length; i++){
+					
+					String[] tokens=keys.split("\\|");
+					
+					float distance=0;
+					for (int j=0; j<tokens.length;j++){
+						
+						float gene=Float.parseFloat(tokens[j].trim());
+						distance=(float) (distance+Math.pow((gene-maximaPositions[i][j])/(upperBound[j]-lowerBound[j]),2));
+					}
+					if (Math.sqrt(distance) < Constants.ACCURACY) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+}	
+	
 	public void runNec(){
 		try {
 	            Process p = Runtime.getRuntime().exec(NEC_COMMAND + " -i "+ NEC_IN_FILE_NAME + " -o " + NEC_OUT_FILE_NAME);
@@ -332,27 +331,6 @@ public float evaluate(float x1, float x2){
 	}
 	
 		
-		
-	
-	
-	public float findPointInPlane(float[] x, float[] y, float z[]){
-		
-		float n_x=(y[1]-y[0])*(z[2]-z[0])-(z[1]-z[0])*(y[2]-y[0]);
-		float n_y=-(z[2]-z[0])*(x[1]-x[0])+(x[2]-x[0])*(z[1]-z[0]);
-		float n_z=(x[1]-x[0])*(y[2]-y[0])+(y[1]-y[0])*(x[2]-x[0]);
-		
-		float result=z[0]+(n_x*(x[3]-x[0]) + n_y*(y[3]-y[0]))/n_z;
-		
-		return result;
-		
-	}
-	public float getTheta(int row){
-		return row*theta_step+lower_bound_1;
-	}
-	
-	public float getParam2(int column){
-		return column*param2_step+lower_bound_2;
-	}
 	//Prints the ArrayList with the fitness values
 	
 	public void print(){
@@ -512,21 +490,5 @@ public float evaluate(float x1, float x2){
 		}
 	}
 	
-	public void searchArray(float value){
-		
-		
-		for (int i=0; i<fitnessValues.size(); i++){
-			
-			for (int j=0; j< ((ArrayList<Float>) fitnessValues.get(i)).size();j++){
-				//System.out.print(format1.format(((ArrayList<Float>) fitnessValues.get(i)).get(j))+" | ");
-				if ((float)fitnessValues.get(i).get(j)==value){
-					System.out.println("Theta: "+ i*theta_step +" Length: " +(lower_bound_2+j*param2_step)+" Fitness: " + (float)fitnessValues.get(i).get(j));
-					
-				}
-			}
-			
-		}
-		
-	}
 	
 }

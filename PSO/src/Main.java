@@ -10,27 +10,25 @@ public class Main {
     public static void main(String[] args) {
 //    	ParticleSwarmOptimizer opt=new ParticleSwarmOptimizer(1);
 //    	opt.printSwarm();
-		List<List<Particle>> data=new ArrayList<List<Particle>>();
 		
-		for (int i=0; i<5; i++){
+		for (int i=0; i<1; i++){
 		
-			List<Particle> temp=new ArrayList<Particle>();
 			
 		
-			ParticleSwarmOptimizer opt=new ParticleSwarmOptimizer(1, "Hybrid");
+			ParticleSwarmOptimizer opt=new ParticleSwarmOptimizer(2, true, "Hybrid");
 			
-			temp.add(opt.getBestParticleEver());
+		
 			
 			
 			//opt.printSwarm();
 		
 			
-			while (!opt.converged() && !opt.maxEvaluationsReached()){
+			while (!opt.getFitnessValues().isOptimumFound() && !opt.maxEvaluationsReached()){
 				//System.out.println("Fitness gen" + j +": "+ opt.getBestParticleEver().getBestFitness());
 				
 				opt.updateParticleSwarm();
 				
-				temp.add(opt.getBestParticleEver());
+				
 				
 				//k=opt.getNumberOfEvaluations();
 				//System.out.println("Evaluating: " + k +" Run: "+i);
@@ -38,10 +36,9 @@ public class Main {
 				
 			}
 			
-			data.add(temp);
 			
 			opt.printBestParticle();
-			//System.out.println("Number of Evaluations: " + k);
+			System.out.println("Number of Evaluations: " + opt.getNumberOfEvaluations());
 			
 		//}
 		
@@ -72,8 +69,8 @@ public class Main {
 		}*/
 		//System.out.print(data);
 		
-		System.out.println("Mean Hit Time: "+ findMeanHitTime(data, BEST_FITNESS));
-		System.out.println("Mean Best Fitness: "+ findMeanBestFitness(data, BEST_FITNESS));
+		//System.out.println("Mean Hit Time: "+ findMeanHitTime(data, BEST_FITNESS));
+		//System.out.println("Mean Best Fitness: "+ findMeanBestFitness(data, BEST_FITNESS));
 //		//System.out.println("Mean Genotypic Distance: "+ findMeanGenotypicDistance(data, BEST_FITNESS));
 //		
 

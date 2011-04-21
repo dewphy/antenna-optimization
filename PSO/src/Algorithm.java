@@ -1,7 +1,6 @@
 
 public interface Algorithm {
 	
-	public boolean isOptimumFound();
 	public float[] getBestPosition();
 	public float getBestFitness();
 	
