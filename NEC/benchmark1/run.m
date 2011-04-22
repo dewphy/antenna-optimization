@@ -36,36 +36,36 @@ dlmwrite('outputs/directivity-b1.txt', Z');
 save('outputs/directivity-b1.m', 'X', 'Y', 'Z');
 
 %% Compute fitted directivity (cubic interpolation).
-opts = fitoptions('cubicinterp');
-opts.Weights = zeros(1,0);
-opts.Normalize = 'on';
-[fitresult, gof] = fit([X(:), Y(:)], Z(:), 'cubicinterp', opts);
-
-%% Plot fitted directivity (Cubic Interpolation).
-figure('Name', 'Benchmark#1 - (NEC + Cubic Interpolation)');
-
-plot(fitresult, [X(:), Y(:)], Z(:));
-xlabel('Theta (degree)', 'FontSize', 20);
-ylabel('Length (meter)', 'FontSize', 20);
-zlabel('Directivity (dimensionless)', 'FontSize', 20);
-view(-53.5, 40);
-
-%% Plot fitted directivity (Cubic Interpolation).
-figure('Name', 'Benchmark#1 - (NEC + Cubic Interpolation)');
-
-step = 0.01;
-XX = 0:step:90;
-YY = 0.5:step:3;
-
-[XX, YY] = meshgrid(XX, YY);
-ZZ = fitresult(XX(:), YY(:));
-ZZ = reshape(ZZ, size(XX));
-
-surf(XX, YY, ZZ, 'EdgeAlpha', 0.3);
-xlabel('Theta (degree)', 'FontSize', 20);
-ylabel('Length (meter)', 'FontSize', 20);
-zlabel('Directivity (dimensionless)', 'FontSize', 20);
-
-%% Save directivity (Cubic Interpolation).
-dlmwrite('outputs/directivity-b1-ci.txt', ZZ');
-save('outputs/directivity-b1-ci.m', 'XX', 'YY', 'ZZ');
+% opts = fitoptions('cubicinterp');
+% opts.Weights = zeros(1,0);
+% opts.Normalize = 'on';
+% [fitresult, gof] = fit([X(:), Y(:)], Z(:), 'cubicinterp', opts);
+% 
+% %% Plot fitted directivity (Cubic Interpolation).
+% figure('Name', 'Benchmark#1 - (NEC + Cubic Interpolation)');
+% 
+% plot(fitresult, [X(:), Y(:)], Z(:));
+% xlabel('Theta (degree)', 'FontSize', 20);
+% ylabel('Length (meter)', 'FontSize', 20);
+% zlabel('Directivity (dimensionless)', 'FontSize', 20);
+% view(-53.5, 40);
+% 
+% %% Plot fitted directivity (Cubic Interpolation).
+% figure('Name', 'Benchmark#1 - (NEC + Cubic Interpolation)');
+% 
+% step = 0.01;
+% XX = 0:step:90;
+% YY = 0.5:step:3;
+% 
+% [XX, YY] = meshgrid(XX, YY);
+% ZZ = fitresult(XX(:), YY(:));
+% ZZ = reshape(ZZ, size(XX));
+% 
+% surf(XX, YY, ZZ, 'EdgeAlpha', 0.3);
+% xlabel('Theta (degree)', 'FontSize', 20);
+% ylabel('Length (meter)', 'FontSize', 20);
+% zlabel('Directivity (dimensionless)', 'FontSize', 20);
+% 
+% %% Save directivity (Cubic Interpolation).
+% dlmwrite('outputs/directivity-b1-ci.txt', ZZ');
+% save('outputs/directivity-b1-ci.m', 'XX', 'YY', 'ZZ');

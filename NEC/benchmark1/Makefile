@@ -1,7 +1,7 @@
 # Paremeters.
 CALLNEC_SRC=CALLNEC.f90
 CALLNEC_EXE=outputs/CALLNEC.exe
-GFORTRAN=gfortran-mp-4.4
+GFORTRAN=gfortran-mp-4.5
 
 all: $(CALLNEC_EXE)
 
