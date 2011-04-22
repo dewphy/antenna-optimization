@@ -8,9 +8,9 @@ public class Main {
 	public static void main(String[] args) {
 		System.out.println("BEGIN");
 		
-		int benchmarkId = 1;
+		int benchmarkId = 2;
 		int maxNumberOfEvaluations = 1000;
-		int nRuns = 100;
+		int nRuns = 1;
 		int nSuccesses = 0;
 		int sumHitTime = 0;
 		
