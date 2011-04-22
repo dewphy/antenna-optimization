@@ -7,6 +7,5 @@ public interface Algorithm {
 	
 	public float[] getBestFitnesses();
 	public float[][] getBestPositions();
-
-	public boolean isOptimumFound();
+	boolean isOptimumFound();
 }

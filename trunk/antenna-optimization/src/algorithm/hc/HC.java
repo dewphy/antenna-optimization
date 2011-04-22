@@ -16,7 +16,7 @@ public class HC implements Algorithm {
 		this.maxNumberOfEvaluations = maxNumberOfEvaluations;
 
 		// Initialize evaluator.
-		evaluator = new FitnessEvaluatorImpl(benchmarkId);
+		evaluator = new FitnessEvaluatorImpl(benchmarkId, true);
 		evaluator.load();
 
 		// Pick a random position.

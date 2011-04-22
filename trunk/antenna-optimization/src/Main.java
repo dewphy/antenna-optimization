@@ -1,4 +1,6 @@
+import algorithm.aco.AntColony;
 import algorithm.hc.HC;
+import algorithm.pso.ParticleSwarmOptimizer;
 
 
 public class Main {
@@ -13,7 +15,8 @@ public class Main {
 		int sumHitTime = 0;
 		
 		for (int i = 0; i < nRuns; i++) {
-			HC hc = new HC(benchmarkId, maxNumberOfEvaluations);
+			AntColony hc = new AntColony(benchmarkId, true, true, true);
+			
 			if (hc.isOptimumFound()) {
 				nSuccesses++;
 				sumHitTime += hc.getNumberOfEvaluations();
