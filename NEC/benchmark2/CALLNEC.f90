@@ -49,7 +49,7 @@
 	CLOSE(15)
 
 	! Run NEC on NEC.INP and place the output in NEC.OUT
-	CALL system('../../../AntennaOptimization/PSO/nec2c/nec2c -i NEC.INP -o NEC.OUT')
+	CALL system('../Debug/NEC -i NEC.INP -o NEC.OUT')
 
 	! Extract directivity from NEC.OUT and place the output in GAINS.OUT
 	CALL system("cat  NEC.OUT | head -n $(expr $(cat NEC.OUT " &
