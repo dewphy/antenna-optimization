@@ -26,7 +26,7 @@ public class Constants {
 	
 	public static final float[] UPPER_BOUND_4={90f, 1.5f};
 	public static final float[] LOWER_BOUND_4={10f, 0.5f};
-	public static final float[] STEP_4={(float) 0.5, (float) (0.05)};
+	public static final float[] STEP_4={(float) 1, (float) (0.05)};
 	
 	public static final float UPPER_BOUND_5=1.5f;
 	public static final float LOWER_BOUND_5=0.5f;
