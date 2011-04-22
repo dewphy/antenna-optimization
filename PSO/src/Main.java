@@ -15,64 +15,32 @@ public class Main {
 		
 			
 		
-			ParticleSwarmOptimizer opt=new ParticleSwarmOptimizer(2, true, "Hybrid");
-			
-		
-			
-			
-			//opt.printSwarm();
+			ParticleSwarmOptimizer opt=new ParticleSwarmOptimizer(2, false, "Hybrid");
 		
 			
 			while (!opt.getFitnessValues().isOptimumFound() && !opt.maxEvaluationsReached()){
-				//System.out.println("Fitness gen" + j +": "+ opt.getBestParticleEver().getBestFitness());
 				
 				opt.updateParticleSwarm();
-				
-				
 				
 				//k=opt.getNumberOfEvaluations();
 				//System.out.println("Evaluating: " + k +" Run: "+i);
 				//opt.printBestParticle();
-				
-			}
+				}
 			
 			
 			opt.printBestParticle();
+			for(int k=0; k<opt.getBestFitnesses().length; k++){
+				System.out.println("Generation "+ k+ " : "+opt.getBestFitnesses()[k]);
+			}
+		
 			System.out.println("Number of Evaluations: " + opt.getNumberOfEvaluations());
 			
-		//}
-		
-		//int horiz=(int) (opt.getBestParticleEver().getPosition()[0]/0.5);
-		//int vert=(int)((opt.getBestParticleEver().getPosition()[1]-5)/0.08);
-		
-		//System.out.println("Matrix row: "+ horiz + " Matrix column: " +vert);
-		//System.out.println("Value: " + opt.getFitnessValues().evaluate(opt.getBestParticleEver().getPosition()[0], opt.getBestParticleEver().getPosition()[1]) );
-		/*System.out.println("Value: " + opt.getFitnessValues().evaluate(45.55f, 6.51f) + (" ") + (int)45.55/0.5 + " "+ (int) ( (6.51-5)/0.08f));
-		float[] test1={1f,0f,0f,0f};
-		float[] test2={0f,1f,0f,0f};
-		float[] test3={0f,0f,1f,0f};
-		System.out.println("Point:" +opt.getFitnessValues().findPointInPlane(test1,test2,test3));
-		opt.printSwarm();*/
-		//FitnessEvaluatorImpl eval=new FitnessEvaluatorImpl(1);
-		//eval.load();
-		//eval.print();*/
-		
-		//System.out.println(eval.getNumberOfEvaluations());
-		//opt.getFitnessValues().searchArray();
-	}
-		/*for (int i=0; i<data.size(); i++){
-			for (int j=0; j<data.get(i).size();j++){
-				System.out.print(data.get(i).get(j).getBestFitness()+" | ");
-				
-			}
-			System.out.println(i);
-		}*/
-		//System.out.print(data);
+		}
 		
 		//System.out.println("Mean Hit Time: "+ findMeanHitTime(data, BEST_FITNESS));
 		//System.out.println("Mean Best Fitness: "+ findMeanBestFitness(data, BEST_FITNESS));
 //		//System.out.println("Mean Genotypic Distance: "+ findMeanGenotypicDistance(data, BEST_FITNESS));
-//		
+	
 
 	}
 	
