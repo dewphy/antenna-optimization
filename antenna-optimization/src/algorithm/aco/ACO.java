@@ -8,13 +8,14 @@ import benchmark.FitnessEvaluatorImpl;
 import algorithm.Algorithm;
 
 
-public class AntColony implements Algorithm {
+public class ACO implements Algorithm {
 	
 	private Ant[] colony;
 	
 	private FitnessEvaluatorImpl fitnessValues;
 	private Ant bestAnt;
 	private float[][] pheromoneTrails;
+	
 	
 	private int benchmarkNumber;
 	
@@ -24,6 +25,8 @@ public class AntColony implements Algorithm {
 	private boolean recencyMemoryOn;
 	private boolean[][] memory;
 	
+	private int maxEvaluations;
+	
 	final int NUMBER_OF_ANTS=30;
 	final float EVAP_RATE=0.9f;
 	
@@ -32,53 +35,16 @@ public class AntColony implements Algorithm {
 	
 
 
-	public AntColony(int benchNumber, boolean discrete, boolean recencyUse, boolean localSearch){
+	public ACO(int benchNumber, int maxEvaluations, boolean discrete, boolean recencyUse, boolean localSearch){
+		this.maxEvaluations=maxEvaluations;
 		localSearchOn=localSearch;
 		recencyMemoryOn=recencyUse;
 		benchmarkNumber=benchNumber;
 		
 		
-//		switch (benchmarkNumber){
-//		case 1: lowerBound=Constants.LOWER_BOUND_1;
-//				upperBound=Constants.UPPER_BOUND_1;
-//				break;
-//		case 2: lowerBound=Constants.LOWER_BOUND_2;
-//				upperBound=Constants.UPPER_BOUND_2;
-//				
-//				break;
-//		
-//		case 3: lowerBound=Constants.LOWER_BOUND_3;
-//				upperBound=Constants.UPPER_BOUND_3;
-//				
-//				break;
-//		
-//		case 4: lowerBound=Constants.LOWER_BOUND_4;
-//				upperBound=Constants.UPPER_BOUND_4;
-//				break;
-//				
-//		case 5:		lowerBound=new float[6];
-//					upperBound=new float[6];
-//					
-//				for(int i=0; i<lowerBound.length; i++){
-//					upperBound[i]=Constants.UPPER_BOUND_5;
-//					lowerBound[i]=Constants.LOWER_BOUND_5;
-//				}
-//				break;
-//				
-//		case 6: 
-//				lowerBound=new float[12];
-//				upperBound=new float[12];
-//				
-//				for(int i=0; i<lowerBound.length; i++){
-//					upperBound[i]=Constants.UPPER_BOUND_5;
-//					lowerBound[i]=Constants.LOWER_BOUND_5;
-//					
-//				}
-//				break; 
-		
-//	}
+
 		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber, discrete);
-		//fitnessValues.load();
+		
 		lowerBound=fitnessValues.getLowerBound();
 		upperBound=fitnessValues.getUpperBound();
 		
@@ -102,11 +68,12 @@ public class AntColony implements Algorithm {
 		calculateFitness();
 		updateBestAnt();
 		
-		 while (!this.isOptimumFound() && this.getNumberOfEvaluations()<Constants.MAX_NUMBER_EVALUATIONS){
+		 while (!this.isOptimumFound() && this.getNumberOfEvaluations()<maxEvaluations){
 			
 			 optimize();
 			 
 		}
+		 System.out.println(this.getBestAnt().toString());
 	}
 	
 	public Ant getBestAnt(){
@@ -249,7 +216,7 @@ public class AntColony implements Algorithm {
 					lower=upper;
 					upper=upper+pheromoneTrails[k+1][j]/accumSum;
 					
-					if (upper>1) {upper=1;
+					if (Math.abs(upper-1)<=0.00001f || upper>1) {upper=1;
 					}
 					k++;
 					//System.out.println("Random #: "+probability +"  Lower: "+ lower+" Upper: "+ upper);
@@ -289,7 +256,7 @@ public class AntColony implements Algorithm {
 		//for(int i=0; i<NUMBER_OF_ANTS; i++){
 			//System.out.println(colony[i].toString());
 		int i=0;
-		while (i<NUMBER_OF_ANTS && this.getNumberOfEvaluations()<Constants.MAX_NUMBER_EVALUATIONS){
+		while (i<NUMBER_OF_ANTS && this.getNumberOfEvaluations()<maxEvaluations){
 				float[] solutions=colony[i].getArrayWithPhenValues();
 				
 				boolean satisfied=true;
@@ -317,7 +284,7 @@ public class AntColony implements Algorithm {
 		Random generator=new Random();
 		float r=0;
 		
-		while (i<NUMBER_OF_ANTS && this.getNumberOfEvaluations()<Constants.MAX_NUMBER_EVALUATIONS){
+		while (i<NUMBER_OF_ANTS && this.getNumberOfEvaluations()<maxEvaluations){
 			//System.out.println("Local Search for Ant\n" + i);
 			float fitness=colony[i].getCurrentFitness();
 			int pos=-1; 
@@ -327,10 +294,11 @@ public class AntColony implements Algorithm {
 				float[] solutions=colony[i].getArrayWithPhenValues();
 				
 				int k=0;
-				while (k<solutions.length && this.getNumberOfEvaluations()<Constants.MAX_NUMBER_EVALUATIONS){
+				while (k<solutions.length && this.getNumberOfEvaluations()<maxEvaluations){
 					r=(float) generator.nextGaussian();
-					
-					solutions[k]=solutions[k]+r;//(float) (solutions[k]+Math.pow(-1,j)*change[k]);
+					int std=1;
+					if (k==0){std=20;}
+					solutions[k]=solutions[k]+std*r;//(float) (solutions[k]+Math.pow(-1,j)*change[k]);
 					float newFit=0;
 					if (solutions[k]>upperBound[k] || solutions[k]<lowerBound[k]){
 						newFit=0f;
@@ -343,11 +311,11 @@ public class AntColony implements Algorithm {
 					if (newFit>fitness){
 						fitness=newFit;
 						pos=k;
-						improvement=r;
+						improvement=std*r;
 						//power=j;
 						//System.out.println("Better Fitness");
 					}
-					solutions[k]=(float) (solutions[k]-r); //-Math.pow(-1,j)*change[k]);
+					solutions[k]=(float) (solutions[k]-std*r); //-Math.pow(-1,j)*change[k]);
 					k++;
 				}
 				//}
