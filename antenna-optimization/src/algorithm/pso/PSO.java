@@ -1,8 +1,8 @@
 package algorithm.pso;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 import java.util.Random;
 
 import benchmark.FitnessEvaluatorImpl;
@@ -10,12 +10,10 @@ import benchmark.FitnessEvaluatorImpl;
 import algorithm.Algorithm;
 
 
-public class ParticleSwarmOptimizer implements Algorithm {
+public class PSO implements Algorithm {
 	
 	final int NUMBER_OF_PARTICLES=30;
 	//final int NUMBER_OF_GENES=2;
-	final int MAX_EVALUATIONS=1000;
-	
 	
 	final float C1=1.494f;
 	final float C2=1.494f;
@@ -28,13 +26,13 @@ public class ParticleSwarmOptimizer implements Algorithm {
 	
 	float[] dimension;
 	String neighborhoodType;
+	private int maxEvaluations;
 	
 	
 	
-	
-	public ParticleSwarmOptimizer(int benchmarkNumber, boolean discrete, String neighborhoodType){
+	public PSO(int benchmarkNumber, int maxEvaluations, boolean discrete, String neighborhoodType){
 		
-		
+		this.maxEvaluations=maxEvaluations;
 		this.neighborhoodType=neighborhoodType;
 		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber,discrete);
 		//fitnessValues.load();
@@ -111,7 +109,7 @@ public class ParticleSwarmOptimizer implements Algorithm {
 	
 	public void updateParticleSwarm(){
 		int i=0;
-		while (this.getNumberOfEvaluations()<MAX_EVALUATIONS && i<NUMBER_OF_PARTICLES){
+		while (this.getNumberOfEvaluations()<maxEvaluations && i<NUMBER_OF_PARTICLES){
 			
 			float[] maxVelocity=new float[dimension.length];
 			
@@ -277,7 +275,7 @@ public class ParticleSwarmOptimizer implements Algorithm {
 	}
 	
 	public boolean maxEvaluationsReached(){
-		if (this.getNumberOfEvaluations()>=MAX_EVALUATIONS)
+		if (this.getNumberOfEvaluations()>=maxEvaluations)
 			return true;
 		else return false;
 	}
@@ -293,11 +291,6 @@ public class ParticleSwarmOptimizer implements Algorithm {
 	
 	public void printBestParticle(){
 		String particle=bestParticleEver.toString();
-//		String particle=
-//		"Best Theta: " + bestParticleEver.getPosition()[0] +"\n"+
-//		"Best Length: " + bestParticleEver.getPosition()[1]+"\n"+
-//		"Best Fitness: "+ bestParticleEver.getBestFitness() + "\n";
-		
 		System.out.println(particle);
 	}
 
