@@ -60,14 +60,6 @@ public class GP implements Algorithm {
 		}
 		
 		initSolutions();
-//		calculateFitness();
-//		createOffspring();
-//		printGeneration();
-//		
-//		calculateFitness();
-//		createOffspring();
-//		printGeneration();
-//		printGeneration();
 		
 		while (fitnessValues.getNumberOfEvaluations()<numberOfEvaluations && !isOptimumFound()){
 			
@@ -83,20 +75,9 @@ public class GP implements Algorithm {
 			bestPositions.add(pos);
 			
 			createOffspring();
-//			
-////////			printGeneration();
+
 		}
-//////		printGeneration();
-		float max=0;
-		for (int i=0; i<bestPositions.size();i++){
-			if (getBestFitnesses()[i]>max){
-				max=getBestFitnesses()[i];
-			}
-		}
-		System.out.println("Absolute Best: "+ max);
-		
-		System.out.println("Best Fitness: "+ getBestFitness());
-		System.out.println("Best Position: "+ getBestPosition()[0]+" "+getBestPosition()[1]);
+
 	}
 
 	public void initSolutions(){
@@ -113,35 +94,34 @@ public class GP implements Algorithm {
 			int j=0;
 			boolean validSolution=true;
 			while (j<individuals[i].length){
-//				individuals[i][j].printNode();
-//				System.out.println();
+
 				positions[i][j]=evaluateTreeNode(individuals[i][j]);
 			
 			if (validSolution){
 				
-				//System.out.println("Node Values at : "+ j+" "+ positions[j]);
+				
 				
 				if (positions[i][j]<fitnessValues.getLowerBound()[j] || positions[i][j]>fitnessValues.getUpperBound()[j]){
 					fitnesses[i]=0;
 					fitnessPenalties[i]=0;
 					validSolution=false; 
-					//System.out.println("Fitness of individual "+ i+ ": "+fitnesses[i]);
+					
 				}
 				
 				
 			}
 			j++;
 			}
-			if (validSolution) {//positions[i][0]=(float) (positions[i][0]/Math.PI*180);
+			if (validSolution) {
 								fitnesses[i]=fitnessValues.evaluate(positions[i]);
 								fitnessPenalties[i]=fitnesses[i];
 								for (int l=0; l<positions[i].length; l++){
 									fitnessPenalties[i]=fitnessPenalties[i]-individuals[i][l].getSize()/PENALTY;
 								}
-			//System.out.println("Fitness of individual "+ i+ ": "+fitnesses[i]);
+			
 			}
 		}
-		//System.out.println("Number of zero fitness ind "+ c);
+		
 	}
 
 	public void createOffspring(){
@@ -152,7 +132,7 @@ public class GP implements Algorithm {
 			if (generator.nextFloat()<=MUTATION_PROBABILITY){
 				int ind=generator.nextInt(individuals.length);
 				int chrNum=generator.nextInt(individuals[ind].length);
-				//System.out.println("In Program size: "+ individuals[ind][chrNum].getSize());
+				
 				int nodeNum=generator.nextInt(individuals[ind][chrNum].getSize())+1;
 				individualsTemporary[k][chrNum]=individuals[ind][chrNum].copy();
 				
@@ -187,29 +167,26 @@ public class GP implements Algorithm {
 
 					while (r1>lower && l<fitnessPenalties.length-1){
 						l++;
-						//if (l==fitnessPenalties.length) {break;}
+						
 						lower+=fitnessPenalties[l]/fitnessSum;
 					}
-					//System.out.println("R1: "+ r1+" index: "+l);
+					
 					int z=0;
 					lower=fitnessPenalties[z]/fitnessSum;
 					while (r2>lower && z<fitnessPenalties.length-1){
 						z++;
-						//if (z==fitnessPenalties.length) {break;}
+						
 						lower+=fitnessPenalties[z]/fitnessSum;
 					}
-//					if (z==0){z++;};
-//					if (l==0){l++;};
-					//System.out.println("R2: "+ r2+" index: "+z);
+
 					TreeNode[] parent1=new TreeNode[individuals[0].length];
 					TreeNode[] parent2=new TreeNode[individuals[0].length];
-//					
-//					
+				
 					for (int j=0; j<individuals[0].length; j++){
 						parent1[j]=individuals[l][j].copy();
 						parent2[j]=individuals[z][j].copy();
 						swapNodes(parent1[j],generator.nextInt(parent1[j].getSize())+1, parent2[j],generator.nextInt(parent2[j].getSize())+1);
-						//System.out.println("Nodes Swapped");
+						
 					}
 					individualsTemporary[k]=parent1;
 					k++;
@@ -217,44 +194,6 @@ public class GP implements Algorithm {
 						individualsTemporary[k]=parent2;
 						k++;
 					}
-					
-//					TreeNode[] parent1=new TreeNode[individuals[0].length];
-//					TreeNode[] parent2=new TreeNode[individuals[0].length];
-//					int chrNumRec=generator.nextInt(individuals[0].length);
-//					parent1[chrNumRec]=individuals[l][chrNumRec].copy();
-//					parent2[chrNumRec]=individuals[z][chrNumRec].copy();
-//					
-//					swapNodes(parent1[chrNumRec],generator.nextInt(parent1[chrNumRec].getSize())+1, parent2[chrNumRec],generator.nextInt(parent2[chrNumRec].getSize())+1);
-//					float distance1=0;
-//					float distance2=0;
-//					float distance=0;
-//					for (int j=0; j<individuals[0].length; j++){
-//						if (j!=chrNumRec){
-//							parent1[j]=individuals[l][j].copy();
-//							parent2[j]=individuals[z][j].copy();
-//						}
-////						distance1=(float) (distance1+Math.pow((evaluateTreeNode(parent1[j])-evaluateTreeNode(individuals[l-1][j])),2));
-////						distance2=(float) (distance2+Math.pow(evaluateTreeNode(parent2[j])-evaluateTreeNode(individuals[z-1][j]),2));
-////						distance=(float) (distance+Math.pow((fitnessValues.getUpperBound()[j]-fitnessValues.getLowerBound()[j]),2));
-//					}
-//					distance1=Math.abs(evaluateTreeNode(parent1[chrNumRec])-evaluateTreeNode(individuals[l][chrNumRec]));
-//					distance2=Math.abs(evaluateTreeNode(parent2[chrNumRec])-evaluateTreeNode(individuals[z][chrNumRec]));
-//					distance=Math.abs(fitnessValues.getUpperBound()[chrNumRec]-fitnessValues.getLowerBound()[chrNumRec]);
-//					if (distance1<=0.2*distance && distance2<=0.2*distance){
-//						individualsTemporary[k]=parent1;
-//					
-//						if (k<individualsTemporary.length-1){
-//							individualsTemporary[k+1]=parent2;
-//						}
-//					k=k+2;
-//					}
-//					else if (distance1<=0.2*distance){	
-//						individualsTemporary[k]=parent1; k++;
-//					}else if (distance2<=0.2*distance){
-//						individualsTemporary[k]=parent2;k++;
-//					}
-					
-					
 			}
 		}
 		for (int i=0; i<individuals.length;i++){
@@ -270,23 +209,18 @@ public class GP implements Algorithm {
 			TreeNode newNode2=null;
 			TreeNode newN_1;
 			TreeNode newN_2;
-		//	System.out.println("recombination ");
-		//System.out.println("Position1: "+ position1 +" Position 2: "+position2);
 		if (node1.getSize()==1 || position1==1){
 			newN_1=node1;
 			newNode1=node1;
 		}
 		else{
 			counter=0;	
-//			System.out.println("Initial node: ");
-//			node1.printNode();
-//			System.out.println("Found node at position "+ position1 +" :");
+
 			newN_1=findNodeAtPosition(node1, position1);
-//			newN_1.printNode();
+
 			newNode1=node1.getParentNode(newN_1);
 			
-//			System.out.println("Final node: ");
-//			newNode1.printNode();
+
 		}
 		
 		if (node2.getSize()==1 || position2==1){
@@ -298,12 +232,7 @@ public class GP implements Algorithm {
 			newN_2=findNodeAtPosition(node2, position2);
 			newNode2=node2.getParentNode(newN_2);
 		}
-		//System.out.println("\nNode 1 size: " + newNode1.getSize());
-			//System.out.println("\nNode 1 to swap: ");
-			//newNode1.printNode();
-			//System.out.println("\nNode 2 size: " + newNode2.getSize());
-			//System.out.println("\nNode 2 to swap: ");
-			//newNode2.printNode();
+
 			TreeNode temp=newN_1.copy();
 			if (newNode1.isLeftNode(newN_1)){
 				newNode1.setLeft(newN_2);
@@ -326,16 +255,10 @@ public class GP implements Algorithm {
 		}
 	
 	public void MutateNodeAtPosition(TreeNode node, int position, float range){
-//		System.out.println("mutation ");
-//		System.out.println("Node for Mutation: ");
-//		node.printNode();
-//		System.out.println("\nAt position: "+position);
-//		System.out.println("Node size "+node.getSize());
+
 		counter=0;
 		TreeNode newNode;
-//		if (position==1){
-//			newNode=growTree(1,range);
-//		}
+
 		Random generator=new Random();
 		float probOperator=generator.nextFloat();
 		float perturbValue=(float) (range*0.05f*generator.nextGaussian());
@@ -358,7 +281,7 @@ public class GP implements Algorithm {
 			}
 			
 			newNode.setValue(String.valueOf(value));
-			//System.out.println("Counter: "+ counter2 + " Value: "+ String.valueOf(value));
+			
 			switch (counter2){
 			case 0:
 			case 1:
@@ -383,7 +306,7 @@ public class GP implements Algorithm {
 					}	
 					if (newNode.getLeft()==null){
 						newNode.setLeft(growTree(1,range));
-						//System.out.println("Mutation: growing left node");
+						
 					}	
 					break;
 			
@@ -391,12 +314,7 @@ public class GP implements Algorithm {
 			
 		}
 		
-//		if (newNode.getLeft()!=null){
-//			newNode.setLeft(growTree(1,range));
-//		}
-//		else if (newNode.getRight()!=null){
-//			newNode.setRight(growTree(1,range));
-//		}
+
 		
 	}
 
@@ -404,7 +322,7 @@ public class GP implements Algorithm {
 	public TreeNode findNodeAtPosition(TreeNode node, int position){
 
 		if (node!=null){
-			//System.out.println("Counter: " + counter + ", Position: " + position);
+			
 			counter++;
 			if (counter == position){
 				return node;
@@ -429,7 +347,7 @@ public class GP implements Algorithm {
 				System.out.println("\nIndividual #"+i+", Chromosome # "+j+ ", \nNode: " );
 				individuals[i][j].printNode();
 				System.out.println();
-				//System.out.println("Size: "+ individuals[i][j].getSize());
+				
 			}
 		}
 	}
@@ -474,19 +392,19 @@ public class GP implements Algorithm {
 
 			node=new TreeNode(value);
 			count++;
-			//System.out.println("Count Functional Left: "+ count);
+			
 			node.setLeft(growTree(count,range));
 			if (node.getValue().equals("SIN") || node.getValue().equals("COS"))
-			{count--;} //System.out.println("Count Functional Right SIN/COS: "+ count);}
-			else { node.setRight(growTree(count,range));}//System.out.println("Count Functional Right: "+ count);
+			{count--;} 
+			else { node.setRight(growTree(count,range));}
 
 		}
-		else{//Terminal
+		else{
 			double value= (range*generator.nextFloat());
 			node=new TreeNode(String.valueOf(value));
-			//System.out.println("Value assigned: "+ value);
+			
 			count--;
-			//System.out.println("Count Terminal: "+ count);
+			
 		}
 
 		return node;
