@@ -27,9 +27,9 @@ figure('Name', 'Benchmark#1 - (NEC)');
 [X, Y] = meshgrid(X, Y);
 surf(X, Y, Z, 'EdgeAlpha', 0.3);
 
-xlabel('Theta (degree)', 'FontSize', 20);
-ylabel('Length (meter)', 'FontSize', 20);
-zlabel('Directivity (dimensionless)', 'FontSize', 20);
+xlabel('Theta (degree)', 'FontSize', 14);
+ylabel('Length (wavelengths)', 'FontSize', 14);
+zlabel('Directivity (dimensionless)', 'FontSize', 14);
 
 %% Save directivity (NEC).
 dlmwrite('outputs/directivity-b1.txt', Z');
