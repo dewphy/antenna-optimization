@@ -8,7 +8,7 @@ X = 0:0.5:180;              % Theta (degree)
 Y = 5 + ((1:201)-1)*0.05;   % Length (meter)
 Z = [];                     % Directivity (dimensionless)
 
-%% Compute directivity (NEC).
+%% Compute directivity.
 % (expected time: 441 seconds)
 tic
 for y = Y,
@@ -21,26 +21,18 @@ end
 Z = Z';
 toc
 
-%% Plot directivity without noise (NEC).
-figure('Name', 'Benchmark#2 - without noise (NEC)');
+%% Plot directivity with gaussian noise (mean=0,variance=2).
+figure('Name', 'Benchmark#2');
 
 [X, Y] = meshgrid(X, Y);
-surf(X, Y, Z, 'EdgeAlpha',0.3);
-xlabel('Theta (degree)', 'FontSize', 20);
-ylabel('Distance (meter)', 'FontSize', 20);
-zlabel('Directivity (dimensionless)', 'FontSize', 20);
+surf(X, Y, Z + normrnd(0,sqrt(0.2), 201, 361), 'EdgeAlpha',0.2);
+xlabel('Theta (degree)', 'FontSize', 16);
+ylabel('Distance (wavelengths)', 'FontSize', 16);
+zlabel('Directivity (dimensionless)', 'FontSize', 16);
 
-% %% Plot directivity with gaussian noise (mean=0,variance=2) (NEC).
-% figure('Name', 'Benchmark#2 - with noise (NEC)');
-% 
-% surf(X, Y, Z + normrnd(0,sqrt(0.2), 201, 361), 'EdgeAlpha',0.3);
-% xlabel('Theta (degree)', 'FontSize', 20);
-% ylabel('Distance (meter)', 'FontSize', 20);
-% zlabel('Directivity (dimensionless)', 'FontSize', 20);
-% 
-% %% Save directivity (NEC).
-% dlmwrite('./outputs/directivity-b2.txt', Z);
-% save('./outputs/directivity-b2.m', 'X', 'Y', 'Z');
+%% Save directivity.
+dlmwrite('./outputs/directivity-b2.txt', Z);
+save('./outputs/directivity-b2.m', 'X', 'Y', 'Z');
 
 % %% Compute fitted directivity (cubic interpolation).
 % opts = fitoptions('cubicinterp');
