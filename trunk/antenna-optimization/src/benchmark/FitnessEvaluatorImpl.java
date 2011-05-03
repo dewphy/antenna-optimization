@@ -18,7 +18,9 @@ import java.text.*;
 
 public class FitnessEvaluatorImpl implements FitnessEvaluator{
 
-	private int numberOfEvaluations; 
+	private int numberOfEvaluations;
+	private final int maxNumberOfEvaluations;
+
 	private int benchmarkNumber; //1: theta, length; 2: theta, distance, 3: theta, beta, 4: alpha, length 
 	private String filePath;	// defined in the interface
 
@@ -33,25 +35,27 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	final String NEC_IN_FILE_NAME="nec2c/NEC.INP";
 	final String NEC_COMMAND="nec2c/nec2c";
 
-	private float[] step;
 	private float maxFitness;
 
 	private float[][] maximaPositions;
+	private int[] bestPosition;
+	private float bestFitness = 0;
 
+	private float[] step;
 	private float[] lowerBound;
 	private float[] upperBound;
 
-
+	List<String> memory = new ArrayList<String>();
 	Map<String,Float> cache = new HashMap<String,Float>();
 	private boolean discrete;
 
 	private int NDIP;
 
 	//Constructor takes in the number of the benchmark, links to file path
-	public FitnessEvaluatorImpl(int benchmarkNumber, boolean discrete){
-
-		numberOfEvaluations=0;
-		this.discrete=discrete;
+	public FitnessEvaluatorImpl(int benchmarkNumber, int maxNumberOfEvaluations, boolean discrete){
+		this.discrete = discrete;
+		this.numberOfEvaluations = 0;
+		this.maxNumberOfEvaluations = maxNumberOfEvaluations;
 		this.benchmarkNumber=benchmarkNumber;
 		fitnessValues=new ArrayList<List<Float>>();
 		format1=new DecimalFormat("00.000000");
@@ -132,22 +136,16 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		return lowerBound;
 	}
 
-	public float getBestFitness(){
-
-		return maxFitness;
-	}
-
-	public float[][] getBestPosition(){
-		return maximaPositions;
-
-	}
-
 	public int getPositionLength(){
 		return lowerBound.length;
 	}
 
 	//Returns the number of Evaluations performed for the class instance
 	public int getNumberOfEvaluations(){
+//		System.out.println("NumberOfEvaluations: " + memory.size() + "/" + numberOfEvaluations + "/" + cache.size());
+		if (numberOfEvaluations != memory.size()) {
+			new RuntimeException("Error: Number of evaluation does not match memory size!");
+		}
 		return numberOfEvaluations;
 	}
 
@@ -214,6 +212,7 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 			e.printStackTrace();
 		}
 	}
+
 	public float evaluate(float[] position){
 
 		StringBuilder keyBuilder = new StringBuilder(); 
@@ -241,11 +240,69 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		return cache.get(key);
 	}
 
+	@Override
+	public float[] evaluate(float[][] positions) {
+		float[] fitnesses = new float[positions.length];
+		for (int i = 0; i < positions.length; i++) {
+			fitnesses[i] = evaluate(positions[i]);
+		}
+		return fitnesses;
+	}
+	
+	@Override
+	public float evaluate(int[] position) {
+		StringBuilder keyBuilder = new StringBuilder();
+		keyBuilder.append(String.valueOf(position[0]));
+		for (int i = 1; i < position.length; i++) {
+			keyBuilder.append("|" + String.valueOf(position[i]));
+		}
+		String key = keyBuilder.toString();
 
+		if (!cache.containsKey(key)) {
+			Float fitness;
+			numberOfEvaluations++;
+			int row=position[0];
+			int column=position[1];
 
+			fitness=fitnessValues.get(row).get(column);
+			cache.put(key, fitness);
+			memory.add(key);
+//			System.out.println("key: " + key);
+			if (fitness > bestFitness) {
+				bestFitness = fitness;
+				bestPosition = copyPosition(position);
+			}
+		}
+		return cache.get(key);
+	}
+
+	@Override
+	public float[] evaluate(int[][] positions) {
+		float[] fitnesses = new float[positions.length];
+		for (int i = 0; i < positions.length; i++) {
+			fitnesses[i] = evaluate(positions[i]);
+		}
+//		System.out.println(memory);
+		return fitnesses;
+	}
+
+	private int[] keyToIntPosition(String key) {
+		String[] blocks = key.split("\\|");
+		
+		if (blocks.length != getPositionLength()) {
+			new RuntimeException("Error: Bad key");
+		}
+	
+		int[] position = new int[getPositionLength()];
+		for (int k = 0; k < position.length; k++) {
+			position[k] = Integer.valueOf(blocks[k]);
+		}
+		return position;
+	}
+	
 	public boolean isOptimumFound() {
 		for (Float fitness : cache.values()) {
-			if (Math.abs(fitness - getBestFitness()) < Constants.ACCURACY) {
+			if (Math.abs(fitness - maxFitness) < Constants.ACCURACY) {
 				return true;
 			}
 		}
@@ -492,22 +549,137 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	}
 
 	@Override
-	public float evaluate(int[] position) {
-		// TODO Auto-generated method stub
-		return 0;
+	public boolean shouldTerminate() {
+		return (getNumberOfEvaluations() > maxNumberOfEvaluations) || isOptimumFound();
 	}
 
 	@Override
 	public int[] pickRandomPosition() {
-		// TODO Auto-generated method stub
-		return null;
+		Random randomGenerator = new Random();
+		int[] position = new int[getPositionLength()];
+		for (int k = 0; k < getPositionLength(); k++) {
+			int maxIndex = getMaxIndexes()[k];
+			position[k] = (int)(maxIndex*randomGenerator.nextFloat());
+		}
+		return position;
 	}
 
 	@Override
 	public int[] pickBestNeighbor(int[] position) {
-		// TODO Auto-generated method stub
-		return null;
+		float bestNeighborFitness = evaluate(position);
+
+		// Initialize neighbor position and best neighbor position to current position.
+		int[] neighborPosition = copyPosition(position);
+		int[] bestNeighborPosition = copyPosition(position);
+
+		// Find neighbor with best fitness.
+		for (int k = 0; k < getPositionLength(); k++) {
+
+			if (position[k] < getMaxIndexes()[k] -1) {
+				neighborPosition[k] = position[k] + 1;
+				if (evaluate(neighborPosition) >= evaluate(bestNeighborPosition)) {
+					bestNeighborPosition = copyPosition(neighborPosition);
+				}
+			}
+			if (position[k] > 0) {
+				neighborPosition[k] = position[k] - 1;
+				if (evaluate(neighborPosition) >= bestNeighborFitness) {
+					bestNeighborPosition = copyPosition(neighborPosition);
+				}
+			}
+			neighborPosition[k] = position[k];
+		}
+
+		// Return best neighbor position if any.
+		return bestNeighborPosition;
 	}
 
+	private int[] copyPosition(int[] position) {
+		int[] neighborPosition = new int[getPositionLength()];
+		for (int k = 0; k < getPositionLength(); k++) {
+			neighborPosition[k] = position[k];
+		}
+		return neighborPosition;
+	}
 
+	@Override
+	public int[] pickAnyNeighbor(int[] position) {
+
+		// Initialize neighbor position and best neighbor position to current position.
+		int[] pickedPosition = copyPosition(position);
+
+		int k = (int)(getPositionLength()*Math.random());
+
+		if (Math.random() < 0.5) {
+			if (position[k] < getMaxIndexes()[k] - 1) {
+				pickedPosition[k] = position[k] + 1;
+			}
+		} else {
+			if (position[k] > 0) {
+				pickedPosition[k] = position[k] - 1;
+			}
+		}
+		return pickedPosition;
+	}
+
+	@Override
+	public int[] getMaxIndexes() {
+		int[] maxIndexes = new int[2];
+		maxIndexes[0] = fitnessValues.size();
+		maxIndexes[1] = fitnessValues.get(0).size();
+		return maxIndexes;
+	}
+
+	@Override
+	public void print(int[] position) {
+		for (int k = 0; k < this.getPositionLength(); k++) {
+			System.out.print("  position[" + k + "]: " + position[k]);
+		}
+		System.out.println("--> fitness: " + evaluate(position));
+	}
+
+	@Override
+	public float[] convertPositionToFloat(int[] position) {
+		float[] floatPosition = new float[getPositionLength()];
+		for (int k = 0; k < getPositionLength(); k++) {
+			floatPosition[k] = lowerBound[k] + position[k]*step[k];
+		}
+		return floatPosition;
+	}
+
+	@Override
+	public float[] getBestPosition(){
+		return convertPositionToFloat(bestPosition);
+	}
+	
+	@Override
+	public float[][] getBestPositions() {
+		System.out.println("Size: " + memory.size());
+		float[][] bestPositions = new float[memory.size()][getPositionLength()];
+		bestPositions[0] = convertPositionToFloat(keyToIntPosition(memory.get(0)));
+		for (int i = 1; i < bestPositions.length; i++) {
+			float[] position = convertPositionToFloat(keyToIntPosition(memory.get(i)));
+			if (this.evaluate(position) > this.evaluate(bestPositions[i-1])) {
+				bestPositions[i] = position;
+			} else {
+				bestPositions[i] = bestPositions[i-1]; 
+			}
+		}
+		return bestPositions;
+	}
+	
+	@Override
+	public float getBestFitness(){
+		return bestFitness;
+	}
+
+	@Override
+	public float[] getBestFitnesses() {
+		return evaluate(getBestPositions());
+	}
+
+	@Override
+	public int[] getBestIntPosition() {
+		return copyPosition(bestPosition);
+	}
 }

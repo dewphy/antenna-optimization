@@ -8,4 +8,5 @@ public interface Algorithm {
 	public float[] getBestFitnesses();
 	public float[][] getBestPositions();
 	boolean isOptimumFound();
+	public int getNumberOfEvaluations();
 }
