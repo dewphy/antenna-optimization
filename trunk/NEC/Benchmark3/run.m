@@ -5,11 +5,11 @@ display(['Benchmark #3']);
 
 %% Define search space.
 X = 0:0.5:180;              % Theta (degree)
-Y = 1:1:401   % Length (meter)
+Y = 1:1:401;                % Beta
 Z = [];                     % Directivity (dimensionless)
 
 %% Compute directivity (NEC).
-% (expected time: 441 seconds)
+% (expected time: 534 seconds)
 tic
 for y = Y,
     display(['./CALLNEC.exe ' num2str(y)]);
@@ -22,17 +22,19 @@ Z = Z';
 toc
 
 %% Plot directivity without noise (NEC).
-figure('Name', 'Benchmark#3 -  (NEC)');
-Y=(Y-1)*0.01;
+figure('Name', 'Benchmark#3');
+Y = (Y-1)*0.01;
 [X, Y] = meshgrid(X, Y);
-surf(X, Y, Z, 'EdgeAlpha',0.3);
-xlabel('Theta (degree)', 'FontSize', 20);
-ylabel('Beta', 'FontSize', 20);
-zlabel('Directivity (dimensionless)', 'FontSize', 20);
+surf(X, Y, Z, 'EdgeAlpha',0.2);
+xlabel('\theta (degree)', 'FontSize', 16);
+ylabel('\beta', 'FontSize', 16);
+zlabel('Directivity (dimensionless)', 'FontSize', 16);
+set(gcf, 'Position', [54, 168, 723, 500]);
 
 %% Save directivity (NEC).
 dlmwrite('./outputs/directivity-b3.txt', Z);
 save('./outputs/directivity-b3.m', 'X', 'Y', 'Z');
+saveas(gcf,'./outputs/landscape-b3', 'fig');
 
 %% Plot fitted directivity (Cubic Interpolation).
 % figure('Name', 'Benchmark#3 - without noise (NEC + Cubic Interpolation)');
