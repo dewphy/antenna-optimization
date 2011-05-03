@@ -34,7 +34,11 @@ public class PSO implements Algorithm {
 		
 		this.maxEvaluations=maxEvaluations;
 		this.neighborhoodType=neighborhoodType;
-		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber, maxEvaluations, discrete);
+
+		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber,maxEvaluations, discrete);
+
+		
+
 		//fitnessValues.load();
 		//fitnessValues.print();
 		swarm = new Particle[NUMBER_OF_PARTICLES];
