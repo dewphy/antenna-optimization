@@ -42,7 +42,7 @@ public class GP implements Algorithm {
 	public GP(int benchmarkNumber,int numberOfEvaluations, boolean discrete){
 		this.benchmarkNumber=benchmarkNumber;
 		this.numberOfEvaluations=numberOfEvaluations;
-		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber,discrete);
+		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber,numberOfEvaluations,discrete);
 		individuals=new TreeNode[NUMBER_OF_INDIVIDUALS][fitnessValues.getPositionLength()];
 		individualsTemporary=new TreeNode[NUMBER_OF_INDIVIDUALS][fitnessValues.getPositionLength()];
 		
