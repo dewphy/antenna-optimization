@@ -43,7 +43,7 @@ public class ACO implements Algorithm {
 		
 		
 
-		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber, discrete);
+		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber, maxEvaluations, discrete);
 		
 		lowerBound=fitnessValues.getLowerBound();
 		upperBound=fitnessValues.getUpperBound();

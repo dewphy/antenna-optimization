@@ -6,20 +6,34 @@ public interface FitnessEvaluator {
 
 	public float evaluate(float[] position);
 	public float evaluate(int[] position);
+	public float[] evaluate(float[][] positions);
+	public float[] evaluate(int[][] positions);
 
-	public void print();
+	public boolean isOptimumFound();
+	public boolean shouldTerminate();
 	public int getNumberOfEvaluations();
 
 	public float[] getUpperBound();
 	public float[] getLowerBound();
 
-	public float getBestFitness();
-
-	public float[][] getBestPosition();
+	public float[] convertPositionToFloat(int[] position);
 	public int getPositionLength();
 
-	public boolean isOptimumFound();
-	
 	public int[] pickRandomPosition();
+	public int[] pickAnyNeighbor(int[] position);
 	public int[] pickBestNeighbor(int[] position);
+
+	public float[] getBestPosition();
+	public float[][] getBestPositions();
+	public float getBestFitness();
+	public float[] getBestFitnesses();
+
+	public int[] getBestIntPosition();
+
+	public void print();
+	public void print(int[] position);
+
+	int[] getMaxIndexes();
+
+
 }
