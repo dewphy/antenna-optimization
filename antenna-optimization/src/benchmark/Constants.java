@@ -3,12 +3,9 @@ package benchmark;
 
 public class Constants {
 	
-	public static final int[] DECIMAL_PLACES={100, 1000};
+	public static final int[] DECIMAL_PLACES={10, 100};
 	public static final int DECIMAL_PLACES_5=1000;
-	
-	public static int MAX_NUMBER_EVALUATIONS=1000;
-	public static int MAX_RUNS=1;
-	
+
 	public static float RECENCY_SELECTION_RATE=0.1f;
 	
 	public static final float[] UPPER_BOUND_1={90f, 3f};
@@ -30,11 +27,13 @@ public class Constants {
 	
 	public static final float UPPER_BOUND_5=1.5f;
 	public static final float LOWER_BOUND_5=0.5f;
+	public static final float STEP_5=0.01f;
 	
 	public static String PATH_BENCH_1="data/directivity-b1.txt";
 	public static String PATH_BENCH_2="data/directivity-b2.txt";
 	public static String PATH_BENCH_3="data/directivity-b3.txt";
 	public static String PATH_BENCH_4="data/directivity-b4.txt";
+	public static String PATH_BENCH_5="data/directivity-b5_2.txt";
 	
 	public static float MAX_FITNESS_1=3.2063f;//2.9512 at 63 2.24;3.1696 at 90 1.26
 	//public static float[] FITNESS_LOCAL_1;
@@ -45,6 +44,7 @@ public class Constants {
 	public static float MAX_FITNESS_3=7.0632f;// at 90; 0.5, 1.5, 2.5, 3.5
 	public static float MAX_FITNESS_4=5.8210f;// at theta=41; l=1.5
 	public static float MAX_FITNESS_5=13.1826f;//at d=0.9f
+	public static float MAX_FITNESS_5_2=13.1826f;
 	public static float MAX_FITNESS_6=25.0035f;// at d=0.9f
 	
 	public static float[][] BEST_POSITION_1={{35.5f,2.56f}};
@@ -54,7 +54,8 @@ public class Constants {
 	
 	public static float[][] BEST_POSITION_3={{90f,0.5f}, {90f,1.5f}, {90f,2.5f}, {90f,3.5f}};
 	public static float[][] BEST_POSITION_4={{41,1.5f}};
-	public static float[][] BEST_POSITION_5={{0.9f,0.9f,0.9f,0.9f,0.9f,0.9f}};
+	public static float[][] BEST_POSITION_5_2={{0.99f,0.99f,0.99f,0.99f}};
+	public static float[][] BEST_POSITION_5={{0.99f,0.99f,0.99f,0.99f,0.99f,0.99f}};
 	public static float[][] BEST_POSITION_6={{0.9f,0.9f,0.9f,0.9f,0.9f,0.9f,0.9f,0.9f,0.9f,0.9f,0.9f,0.9f}};
 	public static float ACCURACY=0.0001f;
 	

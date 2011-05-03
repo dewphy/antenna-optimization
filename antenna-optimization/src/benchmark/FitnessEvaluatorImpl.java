@@ -31,9 +31,9 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	final String FORMAT_2="GW %3d, %3d, %8.4f, %8.4f, %8.4f, %8.4f, %8.4f, %8.4f, %8.4f\n";
 	final String FORMAT_RP="RP 0,1,1,1010, %5.2f, 0., 0., 0.\n";
 	final int RADIUS=1;
-	final String NEC_OUT_FILE_NAME="nec2c/res.out";
-	final String NEC_IN_FILE_NAME="nec2c/NEC.INP";
-	final String NEC_COMMAND="nec2c/nec2c";
+	final String NEC_OUT_FILE_NAME="../NEC/Debug/NEC.OUT";
+	final String NEC_IN_FILE_NAME="../NEC/Debug/NEC.INP";
+	final String NEC_COMMAND="../NEC/Debug/NEC";
 
 	private float maxFitness;
 
@@ -95,18 +95,35 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		maximaPositions=Constants.BEST_POSITION_4;
 		break;
 
-		case 5:		lowerBound=new float[6];
-		upperBound=new float[6];
-		discrete=false;
+		case 5:		if (discrete){
+						lowerBound=new float[4];
+						upperBound=new float[4];
+						for(int i=0; i<lowerBound.length; i++){
+							upperBound[i]=Constants.UPPER_BOUND_5;
+							lowerBound[i]=Constants.LOWER_BOUND_5;
+							step[i]=Constants.STEP_5;
+						}
+						
+						
+						filePath=Constants.PATH_BENCH_5;
+						maxFitness=Constants.MAX_FITNESS_5_2;
+						maximaPositions=Constants.BEST_POSITION_5_2;
+						
+					}
+		else{
+					lowerBound=new float[6];
+					upperBound=new float[6];
+					discrete=false;
 
-		for(int i=0; i<lowerBound.length; i++){
-			upperBound[i]=Constants.UPPER_BOUND_5;
-			lowerBound[i]=Constants.LOWER_BOUND_5;
+					for(int i=0; i<lowerBound.length; i++){
+						upperBound[i]=Constants.UPPER_BOUND_5;
+						lowerBound[i]=Constants.LOWER_BOUND_5;
+					}
+					maxFitness=Constants.MAX_FITNESS_5;
+					maximaPositions=Constants.BEST_POSITION_5;
+					NDIP=7;
 		}
-		maxFitness=Constants.MAX_FITNESS_5;
-		maximaPositions=Constants.BEST_POSITION_5;
-		NDIP=7;
-		break;
+					break;
 
 		case 6: 
 			lowerBound=new float[12];
@@ -225,9 +242,10 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 			Float fitness;
 			numberOfEvaluations++;
 			if (discrete) {
-				int row=(int) ((position[0]-lowerBound[0])/step[0]);
-				int column=(int)((position[1]-lowerBound[1])/step[1]);
-
+				int row=Math.round ((position[0]-lowerBound[0])/step[0]);
+				int column=Math.round((position[1]-lowerBound[1])/step[1]);
+				//System.out.println("theta: "+position[0]+" length: "+position[1]);
+				//System.out.println("COlumn: "+ column +" Row: "+ row);
 				fitness=fitnessValues.get(row).get(column);
 
 			} else {
@@ -240,7 +258,7 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		return cache.get(key);
 	}
 
-	@Override
+
 	public float[] evaluate(float[][] positions) {
 		float[] fitnesses = new float[positions.length];
 		for (int i = 0; i < positions.length; i++) {
