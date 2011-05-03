@@ -22,14 +22,14 @@ Z = Z';
 toc
 
 %% Plot directivity (NEC).
-figure('Name', 'Benchmark#1 - (NEC)');
+figure('Name', 'Benchmark#1');
 
 [X, Y] = meshgrid(X, Y);
-surf(X, Y, Z, 'EdgeAlpha', 0.3);
+surf(X, Y, Z, 'EdgeAlpha', 0.2);
 
-xlabel('Theta (degree)', 'FontSize', 14);
-ylabel('Length (wavelengths)', 'FontSize', 14);
-zlabel('Directivity (dimensionless)', 'FontSize', 14);
+xlabel('Theta (degree)', 'FontSize', 16);
+ylabel('Length (wavelengths)', 'FontSize', 16);
+zlabel('Directivity (dimensionless)', 'FontSize', 16);
 
 %% Save directivity (NEC).
 dlmwrite('outputs/directivity-b1.txt', Z');
