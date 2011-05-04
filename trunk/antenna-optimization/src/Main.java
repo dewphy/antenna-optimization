@@ -20,7 +20,7 @@ import algorithm.ssga.SSGA;
 
 public class Main {
 	
-	public static final String RESULT_DIR = "results/";
+	public static final String RESULT_DIR = "tests/";
 	
 	public static void main(String[] args) throws IOException {
 		System.out.println("BEGIN");
@@ -32,14 +32,14 @@ public class Main {
 
 //		for (int b = 1; b <= 2; b++) {
 //			System.out.println("b: " + b);
-		int b = 4;
+		int b = 1;
 			for (int i = 0; i < nRuns; i++) {
 //				Algorithm sa = new ES(b, maxNumberOfEvaluations);
 //				Algorithm sa = new PSO(b, maxNumberOfEvaluations, true, "Hybrid");
-//				Algorithm sa = new ACO(b, maxNumberOfEvaluations, true, true, true);
-				Algorithm sa = new GP(b, maxNumberOfEvaluations, true);
+				Algorithm sa = new ACO(b, maxNumberOfEvaluations, true, true, true);
+//				Algorithm sa = new GP(b, maxNumberOfEvaluations, true);
 
-				FileWriter fstream = new FileWriter(RESULT_DIR + "B" + b + "//" + (i+1) + ".txt");
+				FileWriter fstream = new FileWriter(RESULT_DIR + "B" + b + "/ACO/" + (i+1) + ".txt");
 				BufferedWriter out = new BufferedWriter(fstream);
 				
 				float[] bestFitnesses = sa.getBestFitnesses();
