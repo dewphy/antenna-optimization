@@ -89,22 +89,24 @@ public class ACO implements Algorithm {
 	}
 	
 	public float[] getBestFitnesses(){
-		float[] temp=new float[bestAnts.size()];
-		for (int i=0; i<bestAnts.size();i++){
-			temp[i]=bestAnts.get(i).getCurrentFitness();
-		}
-		return temp;
+//		float[] temp=new float[bestAnts.size()];
+//		for (int i=0; i<bestAnts.size();i++){
+//			temp[i]=bestAnts.get(i).getCurrentFitness();
+//		}
+//		return temp;
+		return fitnessValues.getBestFitnesses();
 	}
 	public FitnessEvaluatorImpl getFitnessValues(){
 		return fitnessValues;
 	}
 	public float[][] getBestPositions(){
-		float[][] temp=new float[bestAnts.size()][fitnessValues.getPositionLength()];
-		
-		for (int i=0; i<bestAnts.size();i++){
-			temp[i]=bestAnts.get(i).getArrayWithPhenValues();
-		}
-		return temp;
+//		float[][] temp=new float[bestAnts.size()][fitnessValues.getPositionLength()];
+//		
+//		for (int i=0; i<bestAnts.size();i++){
+//			temp[i]=bestAnts.get(i).getArrayWithPhenValues();
+//		}
+//		return temp;
+		return fitnessValues.getBestPositions();
 	}
 	
 	public void initPheromoneTrails(){
@@ -269,7 +271,7 @@ public class ACO implements Algorithm {
 					j++;
 				}
 				if (satisfied){	
-					colony[i].setCurrentFitness(fitnessValues.evaluate(solutions));
+					colony[i].setCurrentFitness(fitnessValues.evaluateFloat(solutions));
 				}
 			
 			i++;
@@ -305,7 +307,7 @@ public class ACO implements Algorithm {
 						//System.out.println("OutOfBounds: " + newFit);
 					}
 					else {
-						newFit=fitnessValues.evaluate(solutions);
+						newFit=fitnessValues.evaluateFloat(solutions);
 					}
 					
 					if (newFit>fitness){

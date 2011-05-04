@@ -63,7 +63,7 @@ public class SAHC implements Algorithm {
 
 	@Override
 	public float getBestFitness() {
-		return evaluator.evaluate(getBestPosition());
+		return evaluator.evaluateFloat(getBestPosition());
 	}
 	
 	@Override

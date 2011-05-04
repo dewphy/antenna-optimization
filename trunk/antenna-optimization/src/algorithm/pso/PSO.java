@@ -50,7 +50,7 @@ public class PSO implements Algorithm {
 			swarm[i]=new Particle(benchmarkNumber);
 		//System.out.println( "Before Theta: "+ swarm[i].getPosition()[0] + "Length: " + swarm[i].getPosition()[1]);
 			
-			swarm[i].setCurrentFitness(fitnessValues.evaluate(swarm[i].getPosition()));
+			swarm[i].setCurrentFitness(fitnessValues.evaluateFloat(swarm[i].getPosition()));
 			swarm[i].setBestFitness(swarm[i].getCurrentFitness());
 			
 			
@@ -81,20 +81,22 @@ public class PSO implements Algorithm {
 	}
 	
 	public float[] getBestFitnesses(){
-		float[] temp=new float[bestParticles.size()];
-		for (int i=0; i<bestParticles.size();i++){
-			temp[i]=bestParticles.get(i).getCurrentFitness();
-		}
-		return temp;
+//		float[] temp=new float[bestParticles.size()];
+//		for (int i=0; i<bestParticles.size();i++){
+//			temp[i]=bestParticles.get(i).getCurrentFitness();
+//		}
+//		return temp;
+		return fitnessValues.getBestFitnesses();
 	}
 	
 	public float[][] getBestPositions(){
-		float[][] temp=new float[bestParticles.size()][fitnessValues.getPositionLength()];
-		
-		for (int i=0; i<bestParticles.size();i++){
-			temp[i]=bestParticles.get(i).getPosition();
-		}
-		return temp;
+//		float[][] temp=new float[bestParticles.size()][fitnessValues.getPositionLength()];
+//		
+//		for (int i=0; i<bestParticles.size();i++){
+//			temp[i]=bestParticles.get(i).getPosition();
+//		}
+//		return temp;
+		return fitnessValues.getBestPositions();
 	}
 	
 	public Particle getBestParticleEver(){
@@ -215,7 +217,7 @@ public class PSO implements Algorithm {
 	
 	public void updateParticleFitness(Particle part){
 		
-		float currentFit=fitnessValues.evaluate(part.getPosition());
+		float currentFit=fitnessValues.evaluateFloat(part.getPosition());
 		part.setCurrentFitness(currentFit);
 		
 		

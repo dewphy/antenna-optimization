@@ -113,7 +113,7 @@ public class GP implements Algorithm {
 			j++;
 			}
 			if (validSolution) {
-								fitnesses[i]=fitnessValues.evaluate(positions[i]);
+								fitnesses[i]=fitnessValues.evaluateFloat(positions[i]);
 								fitnessPenalties[i]=fitnesses[i];
 								for (int l=0; l<positions[i].length; l++){
 									fitnessPenalties[i]=fitnessPenalties[i]-individuals[i][l].getSize()/PENALTY;
@@ -433,27 +433,29 @@ public class GP implements Algorithm {
 	}
 	
 	public float[] getBestFitnesses(){
-		//System.out.println("Size of positions: "+ bestPositions.size());
-		float[] bestFitnesses=new float[bestPositions.size()];
-		for (int i=0; i<bestPositions.size();i++){
-			for (int j=0; j<positions[0].length; j++){
-				if (bestPositions.get(i)[j]<fitnessValues.getLowerBound()[j] || bestPositions.get(i)[j]>fitnessValues.getUpperBound()[j]){
-					bestFitnesses[i]=0;
-				}
-				else {bestFitnesses[i]=fitnessValues.evaluate(bestPositions.get(i));}
-			}
-		}
-		return bestFitnesses;
+//		//System.out.println("Size of positions: "+ bestPositions.size());
+//		float[] bestFitnesses=new float[bestPositions.size()];
+//		for (int i=0; i<bestPositions.size();i++){
+//			for (int j=0; j<positions[0].length; j++){
+//				if (bestPositions.get(i)[j]<fitnessValues.getLowerBound()[j] || bestPositions.get(i)[j]>fitnessValues.getUpperBound()[j]){
+//					bestFitnesses[i]=0;
+//				}
+//				else {bestFitnesses[i]=fitnessValues.evaluate(bestPositions.get(i));}
+//			}
+//		}
+//		return bestFitnesses;
+		return fitnessValues.getBestFitnesses();
 	}
 	
 	public float[][] getBestPositions(){
-		float[][] temp=new float[bestPositions.size()][individuals[0].length];
-		for (int i=0; i<bestPositions.size();i++){
-			for (int j=0; j<individuals[0].length; j++){
-				temp[i][j]=bestPositions.get(i)[j];
-			}
-		}
-		return temp;
+//		float[][] temp=new float[bestPositions.size()][individuals[0].length];
+//		for (int i=0; i<bestPositions.size();i++){
+//			for (int j=0; j<individuals[0].length; j++){
+//				temp[i][j]=bestPositions.get(i)[j];
+//			}
+//		}
+//		return temp;
+		return fitnessValues.getBestPositions();
 	}
 	
 	public boolean isOptimumFound(){
