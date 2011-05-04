@@ -234,35 +234,41 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 
 	public float evaluateFloat(float[] position){
 
-		StringBuilder keyBuilder = new StringBuilder(); 
-		for (int i = 0; i < position.length; i++) {
-			keyBuilder.append(String.valueOf(position[i]) + "|");
+		int[] intPosition = new int[position.length];
+		for (int k = 0; k < position.length; k++) {
+			intPosition[k] = Math.round((position[k]-lowerBound[k])/step[k]);
 		}
-		String key = keyBuilder.toString();
-
-		if (!cache.containsKey(key)) {
-			Float fitness;
-			numberOfEvaluations++;
-			if (discrete) {
-				int row=Math.round ((position[0]-lowerBound[0])/step[0]);
-				int column=Math.round((position[1]-lowerBound[1])/step[1]);
-				//System.out.println("theta: "+position[0]+" length: "+position[1]);
-				//System.out.println("COlumn: "+ column +" Row: "+ row);
-				fitness=fitnessValues.get(row).get(column);
-
-			} else {
-				this.createNecInputFile(position);
-				this.runNec();
-				fitness = this.getGainFromOutputFile();
-			}
-			cache.put(key, fitness);
-			memory.add(key);
-			if (fitness > bestFitness) {
-				bestFitness = fitness;
-				bestFloatPosition = copyPosition(position);
-			}
-		}
-		return cache.get(key);
+		return evaluate(intPosition);
+		
+//		StringBuilder keyBuilder = new StringBuilder(); 
+//		for (int i = 0; i < position.length; i++) {
+//			keyBuilder.append(String.valueOf(position[i]) + "|");
+//		}
+//		String key = keyBuilder.toString();
+//
+//		if (!cache.containsKey(key)) {
+//			Float fitness;
+//			numberOfEvaluations++;
+//			if (discrete) {
+//				int row=Math.round ((position[0]-lowerBound[0])/step[0]);
+//				int column=Math.round((position[1]-lowerBound[1])/step[1]);
+//				//System.out.println("theta: "+position[0]+" length: "+position[1]);
+//				//System.out.println("COlumn: "+ column +" Row: "+ row);
+//				fitness=fitnessValues.get(row).get(column);
+//
+//			} else {
+//				this.createNecInputFile(position);
+//				this.runNec();
+//				fitness = this.getGainFromOutputFile();
+//			}
+//			cache.put(key, fitness);
+//			memory.add(key);
+//			if (fitness > bestFitness) {
+//				bestFitness = fitness;
+//				bestFloatPosition = copyPosition(position);
+//			}
+//		}
+//		return cache.get(key);
 	}
 
 	public float[] evaluate(float[][] positions) {
