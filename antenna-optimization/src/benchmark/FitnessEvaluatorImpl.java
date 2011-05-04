@@ -38,7 +38,8 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	private float maxFitness;
 
 	private float[][] maximaPositions;
-	private int[] bestPosition;
+	private int[] bestIntPosition = null;
+	private float[] bestFloatPosition = null;
 	private float bestFitness = 0;
 
 	private float[] step;
@@ -96,34 +97,34 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		break;
 
 		case 5:		if (discrete){
-						lowerBound=new float[4];
-						upperBound=new float[4];
-						for(int i=0; i<lowerBound.length; i++){
-							upperBound[i]=Constants.UPPER_BOUND_5;
-							lowerBound[i]=Constants.LOWER_BOUND_5;
-							step[i]=Constants.STEP_5;
-						}
-						
-						
-						filePath=Constants.PATH_BENCH_5;
-						maxFitness=Constants.MAX_FITNESS_5_2;
-						maximaPositions=Constants.BEST_POSITION_5_2;
-						
-					}
-		else{
-					lowerBound=new float[6];
-					upperBound=new float[6];
-					discrete=false;
+			lowerBound=new float[4];
+			upperBound=new float[4];
+			for(int i=0; i<lowerBound.length; i++){
+				upperBound[i]=Constants.UPPER_BOUND_5;
+				lowerBound[i]=Constants.LOWER_BOUND_5;
+				step[i]=Constants.STEP_5;
+			}
 
-					for(int i=0; i<lowerBound.length; i++){
-						upperBound[i]=Constants.UPPER_BOUND_5;
-						lowerBound[i]=Constants.LOWER_BOUND_5;
-					}
-					maxFitness=Constants.MAX_FITNESS_5;
-					maximaPositions=Constants.BEST_POSITION_5;
-					NDIP=7;
+
+			filePath=Constants.PATH_BENCH_5;
+			maxFitness=Constants.MAX_FITNESS_5_2;
+			maximaPositions=Constants.BEST_POSITION_5_2;
+
 		}
-					break;
+		else{
+			lowerBound=new float[6];
+			upperBound=new float[6];
+			discrete=false;
+
+			for(int i=0; i<lowerBound.length; i++){
+				upperBound[i]=Constants.UPPER_BOUND_5;
+				lowerBound[i]=Constants.LOWER_BOUND_5;
+			}
+			maxFitness=Constants.MAX_FITNESS_5;
+			maximaPositions=Constants.BEST_POSITION_5;
+			NDIP=7;
+		}
+		break;
 
 		case 6: 
 			lowerBound=new float[12];
@@ -159,9 +160,10 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 
 	//Returns the number of Evaluations performed for the class instance
 	public int getNumberOfEvaluations(){
-//		System.out.println("NumberOfEvaluations: " + memory.size() + "/" + numberOfEvaluations + "/" + cache.size());
 		if (numberOfEvaluations != memory.size()) {
 			new RuntimeException("Error: Number of evaluation does not match memory size!");
+		} else if (numberOfEvaluations != cache.size()) {
+			new RuntimeException("Error: Number of evaluation does not match cache size!");
 		}
 		return numberOfEvaluations;
 	}
@@ -230,7 +232,7 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		}
 	}
 
-	public float evaluate(float[] position){
+	public float evaluateFloat(float[] position){
 
 		StringBuilder keyBuilder = new StringBuilder(); 
 		for (int i = 0; i < position.length; i++) {
@@ -254,19 +256,23 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 				fitness = this.getGainFromOutputFile();
 			}
 			cache.put(key, fitness);
+			memory.add(key);
+			if (fitness > bestFitness) {
+				bestFitness = fitness;
+				bestFloatPosition = copyPosition(position);
+			}
 		}
 		return cache.get(key);
 	}
 
-
 	public float[] evaluate(float[][] positions) {
 		float[] fitnesses = new float[positions.length];
 		for (int i = 0; i < positions.length; i++) {
-			fitnesses[i] = evaluate(positions[i]);
+			fitnesses[i] = evaluateFloat(positions[i]);
 		}
 		return fitnesses;
 	}
-	
+
 	@Override
 	public float evaluate(int[] position) {
 		StringBuilder keyBuilder = new StringBuilder();
@@ -285,10 +291,10 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 			fitness=fitnessValues.get(row).get(column);
 			cache.put(key, fitness);
 			memory.add(key);
-//			System.out.println("key: " + key);
+			//			System.out.println("key: " + key);
 			if (fitness > bestFitness) {
 				bestFitness = fitness;
-				bestPosition = copyPosition(position);
+				bestIntPosition = copyPosition(position);
 			}
 		}
 		return cache.get(key);
@@ -300,24 +306,37 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 		for (int i = 0; i < positions.length; i++) {
 			fitnesses[i] = evaluate(positions[i]);
 		}
-//		System.out.println(memory);
 		return fitnesses;
 	}
 
 	private int[] keyToIntPosition(String key) {
 		String[] blocks = key.split("\\|");
-		
+
 		if (blocks.length != getPositionLength()) {
 			new RuntimeException("Error: Bad key");
 		}
-	
+
 		int[] position = new int[getPositionLength()];
 		for (int k = 0; k < position.length; k++) {
 			position[k] = Integer.valueOf(blocks[k]);
 		}
 		return position;
 	}
-	
+
+	private float[] keyToFloatPosition(String key) {
+		String[] blocks = key.split("\\|");
+
+		if (blocks.length != getPositionLength()) {
+			new RuntimeException("Error: Bad key");
+		}
+
+		float[] position = new float[getPositionLength()];
+		for (int k = 0; k < position.length; k++) {
+			position[k] = Float.valueOf(blocks[k]);
+		}
+		return position;
+	}
+
 	public boolean isOptimumFound() {
 		for (Float fitness : cache.values()) {
 			if (Math.abs(fitness - maxFitness) < Constants.ACCURACY) {
@@ -405,7 +424,6 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 
 		return fitness;
 	}
-
 
 	//Prints the ArrayList with the fitness values
 
@@ -613,11 +631,19 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 	}
 
 	private int[] copyPosition(int[] position) {
-		int[] neighborPosition = new int[getPositionLength()];
+		int[] newPosition = new int[getPositionLength()];
 		for (int k = 0; k < getPositionLength(); k++) {
-			neighborPosition[k] = position[k];
+			newPosition[k] = position[k];
 		}
-		return neighborPosition;
+		return newPosition;
+	}
+
+	private float[] copyPosition(float[] position) {
+		float[] newPosition = new float[position.length];
+		for (int k = 0; k < position.length; k++) {
+			newPosition[k] = position[k];
+		}
+		return newPosition;
 	}
 
 	@Override
@@ -667,25 +693,47 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 
 	@Override
 	public float[] getBestPosition(){
-		return convertPositionToFloat(bestPosition);
+		if (bestIntPosition != null) {
+			return convertPositionToFloat(bestIntPosition);
+		} else {
+			System.out.println("float");
+			return bestFloatPosition;
+		}
 	}
-	
+
 	@Override
 	public float[][] getBestPositions() {
-		System.out.println("Size: " + memory.size());
+//		System.out.println("getBestPositions: memory(" + memory.size() + "), #Evaluations(" + numberOfEvaluations + "), cache(" + cache.size() + ")");
+
 		float[][] bestPositions = new float[memory.size()][getPositionLength()];
-		bestPositions[0] = convertPositionToFloat(keyToIntPosition(memory.get(0)));
-		for (int i = 1; i < bestPositions.length; i++) {
-			float[] position = convertPositionToFloat(keyToIntPosition(memory.get(i)));
-			if (this.evaluate(position) > this.evaluate(bestPositions[i-1])) {
-				bestPositions[i] = position;
-			} else {
-				bestPositions[i] = bestPositions[i-1]; 
+		if (bestIntPosition != null) {
+			bestPositions[0] = convertPositionToFloat(keyToIntPosition(memory.get(0)));
+			float bestFitness = evaluate(keyToIntPosition(memory.get(0)));
+			for (int i = 1; i < bestPositions.length; i++) {
+				float fitness = evaluate(keyToIntPosition(memory.get(i)));
+				if (fitness > bestFitness) {
+					bestFitness = fitness;
+					bestPositions[i] = convertPositionToFloat(keyToIntPosition(memory.get(i)));
+				} else {
+					bestPositions[i] = bestPositions[i-1]; 
+				}
+			}
+		} else {
+			bestPositions[0] = keyToFloatPosition(memory.get(0));
+			float bestFitness = evaluateFloat(bestPositions[0]);
+			for (int i = 1; i < bestPositions.length; i++) {
+				float fitness = evaluateFloat(keyToFloatPosition(memory.get(i)));
+				if (fitness > bestFitness) {
+					bestFitness = fitness;
+					bestPositions[i] = keyToFloatPosition(memory.get(i));
+				} else {
+					bestPositions[i] = bestPositions[i-1]; 
+				}
 			}
 		}
 		return bestPositions;
 	}
-	
+
 	@Override
 	public float getBestFitness(){
 		return bestFitness;
@@ -693,11 +741,36 @@ public class FitnessEvaluatorImpl implements FitnessEvaluator{
 
 	@Override
 	public float[] getBestFitnesses() {
-		return evaluate(getBestPositions());
+//		System.out.println("getBestFitnesses: memory(" + memory.size() + "), #Evaluations(" + numberOfEvaluations + "), cache(" + cache.size() + ")");
+
+		float[] bestFitnesses = new float[memory.size()];
+		
+		if (bestIntPosition != null) {
+			bestFitnesses[0] = evaluate(keyToIntPosition(memory.get(0)));
+			for (int i = 1; i < bestFitnesses.length; i++) {
+				float fitness = evaluate(keyToIntPosition(memory.get(i)));
+				if (fitness > bestFitnesses[i-1]) {
+					bestFitnesses[i] = fitness;
+				} else {
+					bestFitnesses[i] = bestFitnesses[i-1]; 
+				}
+			}
+		} else {
+			bestFitnesses[0] = evaluateFloat(keyToFloatPosition(memory.get(0)));
+			for (int i = 1; i < bestFitnesses.length; i++) {
+				float fitness = evaluateFloat(keyToFloatPosition(memory.get(i)));
+				if (fitness > bestFitnesses[i-1]) {
+					bestFitnesses[i] = fitness;
+				} else {
+					bestFitnesses[i] = bestFitnesses[i-1]; 
+				}
+			}
+		}
+		return bestFitnesses;
 	}
 
 	@Override
 	public int[] getBestIntPosition() {
-		return copyPosition(bestPosition);
+		return copyPosition(bestIntPosition);
 	}
 }

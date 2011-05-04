@@ -86,7 +86,7 @@ public class SAGA implements Algorithm {
 
 	@Override
 	public float getBestFitness() {
-		return evaluator.evaluate(getBestPosition());
+		return evaluator.evaluateFloat(getBestPosition());
 	}
 	
 	@Override
@@ -96,6 +96,6 @@ public class SAGA implements Algorithm {
 
 	@Override
 	public float[] getBestFitnesses() {
-		return evaluator.evaluate(getBestPositions());
+		return evaluator.getBestFitnesses();
 	}
 }

@@ -4,7 +4,7 @@ public interface FitnessEvaluator {
 
 	public void load();
 
-	public float evaluate(float[] position);
+	public float evaluateFloat(float[] position);
 	public float evaluate(int[] position);
 	public float[] evaluate(float[][] positions);
 	public float[] evaluate(int[][] positions);
