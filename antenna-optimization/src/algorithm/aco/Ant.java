@@ -1,8 +1,9 @@
 package algorithm.aco;
 
+import algorithm.pso.Particle;
 import benchmark.Constants;
 
-public class Ant {
+public class Ant implements Comparable<Object> {
 	
 	private int[] solution;
 	private float currentFitness;
@@ -135,7 +136,32 @@ public class Ant {
 		return (float) Math.toDegrees(theta/100);
 	}
 	
-	public float[] getArrayWithPhenValues(){
+//	public float[] getArrayWithPhenValues(){
+//		
+//		
+//		float[] values=new float[separator.length];
+//		
+//		int pointer=0;
+//		boolean flag=false;
+//		for (int i=0; i<separator.length; i++){
+//			values[i]=0;
+//			flag=!flag;
+//			for (int j=0; j<separator[i]; j++){
+//				if (flag){
+//				values[i]=(float) (solution[pointer]*Math.pow(2,separator[i]-j-1)+values[i]);
+//				}else {
+//					values[i]=(float) (solution[pointer]*Math.pow(2,j)+values[i]);
+//				}
+//				//System.out.println(pointer+ " "+solution[pointer]);
+//				pointer++;
+//			}
+//			values[i]=values[i]/decimals[i]+lowerBound[i];
+//			//System.out.print("\nValue "+i+": "+values[i]+"\n");
+//		}
+//
+//		return values;
+//	}
+public float[] getArrayWithPhenValues(){
 		
 		
 		float[] values=new float[separator.length];
@@ -146,42 +172,51 @@ public class Ant {
 			values[i]=0;
 			flag=!flag;
 			for (int j=0; j<separator[i]; j++){
-				if (flag){
-				values[i]=(float) (solution[pointer]*Math.pow(2,separator[i]-j-1)+values[i]);
-				}else {
+				
 					values[i]=(float) (solution[pointer]*Math.pow(2,j)+values[i]);
-				}
+				
 				//System.out.println(pointer+ " "+solution[pointer]);
 				pointer++;
 			}
 			values[i]=values[i]/decimals[i]+lowerBound[i];
 			//System.out.print("\nValue "+i+": "+values[i]+"\n");
 		}
-//		
-//		if (benchmarkNumber==1 || benchmarkNumber==2 || benchmarkNumber==3 || benchmarkNumber==4){
-//			values[0]=(float) Math.toDegrees(values[0]);
-//		}
+
 		return values;
 	}
-	
-	public void setSolutions(float gene, int position){
-		int number=  Math.round((gene-lowerBound[position])*decimals[position]);
-		//System.out.println("Number for " + gene + " at position " + position +" : "+ number);
-		int start=0;
-		for (int i=0; i<position; i++){
-			start=start+separator[i];
-		}
-		//System.out.println("Start: "+ start);
-		//System.out.println("Separator: "+ separator[position]);
-		for (int i=0; i<separator[position]; i++){
-			if (position%2==0){
-			this.setSolution(number%2,separator[position]+start-i-1);
-			//System.out.println(number%2 +" at " + (separator[position]+start-i-1));
-		}else {this.setSolution(number%2,start+i);}
-			number=number/2;
-		}
-		
+public void setSolutions(float gene, int position){
+	int number=  Math.round((gene-lowerBound[position])*decimals[position]);
+	//System.out.println("Number for " + gene + " at position " + position +" : "+ number);
+	int start=0;
+	for (int i=0; i<position; i++){
+		start=start+separator[i];
 	}
+	//System.out.println("Start: "+ start);
+	//System.out.println("Separator: "+ separator[position]);
+	for (int i=0; i<separator[position]; i++){
+		this.setSolution(number%2,start+i);
+		number=number/2;
+	}
+	
+}
+//public void setSolutions(float gene, int position){
+//		int number=  Math.round((gene-lowerBound[position])*decimals[position]);
+//		//System.out.println("Number for " + gene + " at position " + position +" : "+ number);
+//		int start=0;
+//		for (int i=0; i<position; i++){
+//			start=start+separator[i];
+//		}
+//		//System.out.println("Start: "+ start);
+//		//System.out.println("Separator: "+ separator[position]);
+//		for (int i=0; i<separator[position]; i++){
+//			if (position%2==0){
+//			this.setSolution(number%2,separator[position]+start-i-1);
+//			//System.out.println(number%2 +" at " + (separator[position]+start-i-1));
+//		}else {this.setSolution(number%2,start+i);}
+//			number=number/2;
+//		}
+//		
+//	}
 	
 	public String toString(){
 		String ant="Ant:\nChromosome: " ;
@@ -217,5 +252,14 @@ public class Ant {
 		
 		return copied;
 		
+	}
+	
+	public int compareTo(Object anotherAnt){
+		if (currentFitness==((Ant) anotherAnt).getCurrentFitness()){
+			return 0;
+		}else if (currentFitness>((Ant)anotherAnt).getCurrentFitness()){
+			return 1;
+		}
+		else return -1;
 	}
 }
