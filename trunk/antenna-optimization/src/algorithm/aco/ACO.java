@@ -14,6 +14,7 @@ public class ACO implements Algorithm {
 	
 	private FitnessEvaluatorImpl fitnessValues;
 	private Ant bestAnt;
+	private Ant[] eliteAnts=new Ant[5];
 	private float[][] pheromoneTrails;
 	
 	
@@ -29,7 +30,7 @@ public class ACO implements Algorithm {
 	
 	final int NUMBER_OF_ANTS=30;
 	final float EVAP_RATE=0.9f;
-	
+	final float THRESHOLD=0.1f;
 	private float[] lowerBound;
 	private float[] upperBound;
 	
@@ -43,8 +44,8 @@ public class ACO implements Algorithm {
 		
 		
 
-		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber, maxEvaluations, discrete);
-		
+		fitnessValues=new FitnessEvaluatorImpl(benchmarkNumber,maxEvaluations,discrete);
+
 		lowerBound=fitnessValues.getLowerBound();
 		upperBound=fitnessValues.getUpperBound();
 		
@@ -67,6 +68,8 @@ public class ACO implements Algorithm {
 		initSolutions();
 		calculateFitness();
 		updateBestAnt();
+		initEliteAnts();
+		
 		
 		 while (!this.isOptimumFound() && this.getNumberOfEvaluations()<maxEvaluations){
 			
@@ -130,7 +133,7 @@ public class ACO implements Algorithm {
 		Random gen=new Random();
 		for (int k=0; k<colony.length; k++){
 			for (int l=0; l<colony[k].length(); l++){
-				colony[k].setSolution(Math.round(gen.nextFloat()),l);
+				colony[k].setSolution(gen.nextInt(2),l);
 				//System.out.print(colony[k].getSolution()[l]);
 			}
 			//System.out.print("\nSolution " + k+ ": ");
@@ -143,39 +146,67 @@ public class ACO implements Algorithm {
 	
 	for (int k=0; k<colony.length; k++){
 		fitSum=colony[k].getCurrentFitness()+fitSum;
+	}	
+	
+	for (int k=0; k<colony.length; k++){
 		
 		for (int l=0; l<4; l++){
 			for (int j=0; j<colony[k].length(); j++){
 				
 					pheromoneTrails[l][j]=pheromoneTrails[l][j]*(1-EVAP_RATE);
 				
-					if (pheromoneTrails[l][j]<0.005){
-					pheromoneTrails[l][j]=0.005f;
+					if (pheromoneTrails[l][j]<0.0005){
+					pheromoneTrails[l][j]=0.0005f;
 					
+					}
 				}
 			}
-		}
 			
-		if (fitSum==0){}
-		else{
+		if (fitSum!=0){
+			
 			for (int i=0; i<colony[k].length();i++){
 					int a=0;
 					
-					if (i==0) {a=0;} //to account for the transition from initial state 
-					else{
+					if (i!=0) //to account for the transition from initial state 
+					{
 					 a=colony[k].getSolution()[i-1];
 					}
 					
 					int b=colony[k].getSolution()[i];
 					
-					int trans=(int) (a+Math.pow(2,b));
+					int trans=(int) (a+b*Math.pow(2,b));
+					
 					pheromoneTrails[trans][i]=pheromoneTrails[trans][i]+colony[k].getCurrentFitness()/fitSum;
 					memory[trans][i]=true;
-				}
+			} 
 			
-			}
 		}
 	}
+//		if (fitSum!=0){
+//			for (int k=0; k<eliteAnts.length; k++){
+//
+//			
+//				for (int i=0; i<eliteAnts[k].length();i++){
+//					int a=0;
+//					
+//					if (i!=0) //to account for the transition from initial state 
+//					{
+//					 a=eliteAnts[k].getSolution()[i-1];
+//					}
+//					
+//					int b=eliteAnts[k].getSolution()[i];
+//					
+//					int trans=(int) (a+b*Math.pow(2,b));
+//					
+//					pheromoneTrails[trans][i]=pheromoneTrails[trans][i]+eliteAnts[k].getCurrentFitness()/fitSum;
+//					
+//				} 
+//			
+//			}
+//		}
+}
+
+	
 	
 	public void generateSolutions(){
 	
@@ -184,58 +215,112 @@ public class ACO implements Algorithm {
 		for (int j=0; j<colony[i].length();j++){
 			float accumSum=0;
 			
-			for (int k=0; k<4;k++){
-				accumSum=accumSum+pheromoneTrails[k][j];
-			}
 			
 //			calculateProbability
-			
 			Random generator=new Random();
 			float probability=generator.nextFloat();
 			float recencyProbability=generator.nextFloat();
+			
+			int previous=0;
+			if (j!=0){previous=colony[i].getSolution()[j-1];}
+			
 			int count=0;
+			int index=0;
 			
 			if (recencyProbability<= Constants.RECENCY_SELECTION_RATE && recencyMemoryOn){
 				
-				for (int k=0; k<4; k++){
-					if (!memory[k][j]) {colony[i].setSolution(k%2,j); count++; }
+				for (int k=0; k<2; k++){
+					index=(int)(previous+k*Math.pow(2,k));
+					if (!memory[index][j]) {colony[i].setSolution(index%2,j); count++; }
 				}
 			}
 			
 			if (count!=1){
-			float lower=0;
-			float upper=pheromoneTrails[0][j]/accumSum;
-			boolean notFound=true;
-			int k=0;
-			while (k<4 && notFound){
-				if (probability>=lower && probability<=upper){
-					int t=k%2;
-					colony[i].setSolution(t,j);
-					notFound=false;
-					//System.out.println("Sol. component: "+ j+" Ant number: "+ i+ " Solution: "+ colony[i].getSolution()[j]);
-				}
-				else {
-					lower=upper;
-					upper=upper+pheromoneTrails[k+1][j]/accumSum;
+			//float lower=0;
+			//float upper=pheromoneTrails[0][j]/accumSum;
+			//boolean notFound=true;
+//			if (probabilityBest<=THRESHOLD){
+//				float max=0;
+//				int maxIndex=0;
+//				boolean flag=false;
+//				for (int k=0; k<2; k++){
+//					index=(int)(previous+k*Math.pow(2,k));
+//					if (pheromoneTrails[index][j]>max){
+//						max=pheromoneTrails[index][j];
+//						maxIndex=index;
+//						flag=true;
+//					}else if (pheromoneTrails[index][j]==max){
+//						int choice=generator.nextInt(2);
+//						maxIndex=(int) (previous+choice*Math.pow(2,choice));
+//					}
+//				}
+//				
+//					colony[i].setSolution(maxIndex%2,j);
+//				
+//			}
+			
+			for (int k=0; k<2; k++){
+				index=(int)(previous+k*Math.pow(2,k));
+				accumSum+=pheromoneTrails[index][j];
+			}
+			if (probability<=pheromoneTrails[index][j]/accumSum){
 					
-					if (Math.abs(upper-1)<=0.00001f || upper>1) {upper=1;
-					}
-					k++;
+					colony[i].setSolution(index%2,j);
+					//System.out.println("Sol. component: "+ j+" Ant number: "+ i+ " Solution: "+ colony[i].getSolution()[j]);
+			}
+			else {
+				colony[i].setSolution((index+1)%2,j);
 					//System.out.println("Random #: "+probability +"  Lower: "+ lower+" Upper: "+ upper);
-				}
+			}
+			}
+			}
+//			Random generator=new Random();
+//			float probability=generator.nextFloat();
+//			float recencyProbability=generator.nextFloat();
+//			int count=0;
+//			int index=0;
+//			
+//			if (recencyProbability<= Constants.RECENCY_SELECTION_RATE && recencyMemoryOn){
+//				
+//				for (int k=0; k<4; k++){
+//					if (!memory[k][j]) {colony[i].setSolution(k%2,j); count++; }
+//				}
+//			}
+//			
+//			if (count!=1){
+//			float lower=0;
+//			float upper=pheromoneTrails[0][j]/accumSum;
+//			boolean notFound=true;
+//			int k=0;
+//			while (k<4 && notFound){
+//				if (probability>=lower && probability<=upper){
+//					int t=k%2;
+//					colony[i].setSolution(t,j);
+//					notFound=false;
+//					//System.out.println("Sol. component: "+ j+" Ant number: "+ i+ " Solution: "+ colony[i].getSolution()[j]);
+//				}
+//				else {
+//					lower=upper;
+//					upper=upper+pheromoneTrails[k+1][j]/accumSum;
+//					
+//					if (Math.abs(upper-1)<=0.00001f || upper>1) {upper=1;
+//					}
+//					k++;
+//					//System.out.println("Random #: "+probability +"  Lower: "+ lower+" Upper: "+ upper);
+//				}
 		}
 		//System.out.print(colony[i].getSolution()[j]);
 	}
 		//System.out.print("\nSolution " + i+ ": ");
-	}
-	}
-	}
+	
+	
 	
 
 		
 	
 	
 	public void optimize(){
+		
 		//System.out.println("Optimizing");
 		updatePheromoneTrails();
 		//System.out.println("Trails Updated");
@@ -250,6 +335,7 @@ public class ACO implements Algorithm {
 		}
 		updateBestAnt();
 		//System.out.println("Best Ant: "+ bestAnt.toString());
+		updateEliteAnts();
 	}
 
 	
@@ -270,7 +356,8 @@ public class ACO implements Algorithm {
 					}
 					j++;
 				}
-				if (satisfied){	
+				if (satisfied){
+					
 					colony[i].setCurrentFitness(fitnessValues.evaluateFloat(solutions));
 				}
 			
@@ -298,8 +385,8 @@ public class ACO implements Algorithm {
 				int k=0;
 				while (k<solutions.length && this.getNumberOfEvaluations()<maxEvaluations){
 					r=(float) generator.nextGaussian();
-					int std=1;
-					if (k==0){std=20;}
+					int std=2;
+					if (k==0){std=2;}
 					solutions[k]=solutions[k]+std*r;//(float) (solutions[k]+Math.pow(-1,j)*change[k]);
 					float newFit=0;
 					if (solutions[k]>upperBound[k] || solutions[k]<lowerBound[k]){
@@ -346,6 +433,35 @@ public class ACO implements Algorithm {
 			}
 		}
 		bestAnts.add(bestAnt);
+	}
+	
+	public void initEliteAnts(){
+		Arrays.sort(colony);
+		for(int i=0; i<eliteAnts.length; i++){
+			eliteAnts[i]=colony[colony.length-i-1].copy();	
+		}
+	}
+	
+	public Ant[] getBestAntsInGeneration(){
+		Ant[] copy=new Ant[eliteAnts.length];
+		Arrays.sort(colony);
+		for(int i=0; i<eliteAnts.length; i++){
+			copy[i]=colony[colony.length-i-1].copy();	
+		}
+		return copy;
+	}
+	
+	public void updateEliteAnts(){
+		
+		List<Ant> list = new ArrayList<Ant>(Arrays.asList(getBestAntsInGeneration()));
+	
+		list.addAll(Arrays.asList(eliteAnts));
+		Collections.sort(list);
+		for (int i=0; i<eliteAnts.length; i++){
+			eliteAnts[i]=list.get(i);
+		}
+		
+		
 	}
 	
 	public int getNumberOfEvaluations(){
