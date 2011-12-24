@@ -56,7 +56,7 @@ S = '><osdphx*+';
 for b = 1:length(B),
     
     % Initialize plot mean best fitness.
-    figure('Name', ['Benchmark' num2str(b)]); hold all; grid on;
+    figure('Name', ['Benchmark' num2str(b)]); hold all;
     map = colormap(jet);
     C = map(round(linspace(1,64,10)),:);
     
@@ -126,21 +126,30 @@ for b = 1:length(B),
     myLegend = legend(A.name, 'Location', 'SouthEast');
     set(myLegend, 'FontSize', 16);
     set(gcf, 'Position', [54, 168, 723, 500]);
-    set(gca,'YMinorGrid','on');
 
-%     if b == 1,
-%         xlim([0 1000]);
-%         ylim([0.8 1]);
-%     elseif b == 2,
-%         xlim([0 1000]);
-%         ylim([0.9 1]);
-%     elseif b == 3,
-%         xlim([0 1000]);
-%         ylim([0.3 1]);
-%     elseif b == 4,
-%         xlim([0 1000]);
-%         ylim([0.8 1]);
-%     end
+    tightInset = get(gca, 'TightInset');
+    position(1) = tightInset(1);
+    position(2) = tightInset(2);
+    position(3) = 1 - tightInset(1) - tightInset(3);
+    position(4) = 1 - tightInset(2) - tightInset(4);
+    set(gca, 'Position', position);
+
+    grid on;
+     set(gca, 'FontSize', 14);
+     
+    if b == 1,
+        xlim([0 1000]);
+        ylim([0.8 1]);
+    elseif b == 2,
+        xlim([0 1000]);
+        ylim([0.9 1]);
+    elseif b == 3,
+        xlim([0 1000]);
+        ylim([0.3 1]);
+    elseif b == 4,
+        xlim([0 1000]);
+        ylim([0.8 1]);
+    end
     
 %     % Finalize plot for mean genotypic distance.
 %     figure(2*b); hold on; grid on;
@@ -155,15 +164,31 @@ bar(successRate);
 xlabel('Benchmark (#)', 'FontSize', 16);
 ylabel('Success rate (%)', 'FontSize', 16);
 myLegend = legend(A.name, 'Location', 'SouthEast');
-set(myLegend, 'FontSize', 16);
-set(gca,'YMinorGrid','on');
+set(gca,'YMinorGrid','on', 'FontSize',14)
 set(gcf, 'Position', [59, 367, 1147, 312]);
+set(myLegend, 'FontSize', 16, 'Position', [0.900828247602441 0.106570512820513 0.0963382737576286 0.86738782051282]);
 
 figure(length(B)+2); clf;
 bar(meanHitTime);
 xlabel('Benchmark (#)', 'FontSize', 16);
-ylabel('Mean number of evaluations', 'FontSize', 16);
+ylabel('Mean hit time', 'FontSize', 16);
 myLegend = legend(A.name, 'Location', 'NorthEast');
-set(myLegend, 'FontSize', 16);
-set(gca,'YMinorGrid','on');
+set(gca,'YMinorGrid','on', 'FontSize',14)
 set(gcf, 'Position', [59, 367, 1147, 312]);
+set(myLegend, 'FontSize', 16, 'Position', [0.900828247602441 0.106570512820513 0.0963382737576286 0.86738782051282]);
+ylim([0 2200])
+
+annotation(gcf,'textarrow',[0.281624720064197 0.281990521327014],...
+    [0.95 0.90],'TextEdgeColor','none',...
+    'TextLineWidth',1.1,...
+    'FontSize',14,...
+    'String',{'3148'},...
+    'LineWidth',1.1);
+
+% Create textarrow
+annotation(gcf,'textarrow',[0.47274881516588 0.4739336492891],...
+    [0.95 0.90],'TextEdgeColor','none',...
+    'TextLineWidth',1.1,...
+    'FontSize',14,...
+    'String',{'4042'},...
+    'LineWidth',1.1);
